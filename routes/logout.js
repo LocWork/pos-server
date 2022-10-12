@@ -20,10 +20,11 @@ async function checkUserSession(req, res, next) {
 router.post('/', checkUserSession, async (req, res) => {
   try {
     const userLogOut = await pool.query(
-      'Update "account" SET status = \'OFFLINE\' WHERE id=$1',
+      `Update "account" SET status = 'OFFLINE' WHERE id=$1`,
       [req.session.user.id]
     );
     req.session.destroy();
+    req.session = null;
     res.status(200).json();
   } catch (error) {
     console.log(error);

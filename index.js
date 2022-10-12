@@ -10,6 +10,7 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
 const mainPageRoute = require('./routes/mainPage');
+const waiterRoute = require('./routes/waiter');
 const playRoute = require('./routes/playground');
 //other
 // const cors = require('cors');
@@ -20,14 +21,44 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 //Session
+const KnexSessionStore = require('connect-session-knex')(session);
+
+const Knex = require('knex');
+
+const knex = Knex({
+  client: 'pg',
+  connection: {
+    host: '127.0.0.1',
+    user: 'postgres',
+    password: 'qwe',
+    database: 'restaurant',
+  },
+});
+
+const store = new KnexSessionStore({
+  knex,
+  tablename: 'sessions', // optional. Defaults to 'sessions'
+});
+
 app.use(
   session({
     secret: 'POSRES',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // ten seconds, for testing
+    },
+    store,
   })
 );
+// app.use(
+//   session({
+//     secret: 'POSRES',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+//   })
+// );
 
 //IO
 app.use(function (request, response, next) {
@@ -55,6 +86,7 @@ app.use('/logout', logoutRoute);
 
 // app.use(checkUserSession);
 app.use('/mainpage', mainPageRoute);
+app.use('/waiter', waiterRoute);
 app.use('/playground', playRoute);
 
 io.on('connection', (socket) => {

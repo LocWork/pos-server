@@ -5,10 +5,10 @@ const helpers = require('./../utils/helpers');
 const sob = require('./.././staticObj');
 
 //middleware
-async function checkUserSession(req, res, next) {
+async function checkUserAndShiftSession(req, res, next) {
   try {
-    if (req.session.user) {
-      res.status(200).json(req.session.user);
+    if (req.session.user && req.session.shiftId) {
+      res.status(200).json();
     } else {
       next();
     }
@@ -21,9 +21,9 @@ async function checkUserSession(req, res, next) {
 async function checkShift(req, res, next) {
   try {
     const currentShift = await pool.query(
-      "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND w.workdate = CURRENT_DATE"
+      "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND w.workdate = CURRENT_DATE LIMIT 1"
     );
-    if (currentShift) {
+    if (currentShift.rows[0]) {
       req.session.shiftId = currentShift.rows[0].id;
       next();
     } else {
@@ -40,13 +40,18 @@ router.get('/', async (req, res) => {
     const logo = await pool.query(
       'SELECT restaurantImage FROM systemsetting LIMIT 1'
     );
+    if (logo) {
+      res.status(200).json(logo.rows[0]);
+    } else {
+      res.status(200).json({ msg: 'Không thể tìm thấy logo' });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 });
 
-router.post('/', checkUserSession, checkShift, async (req, res) => {
+router.post('/', checkUserAndShiftSession, checkShift, async (req, res) => {
   try {
     //Get user information
     const { username, password } = req.body;
@@ -74,7 +79,7 @@ router.post('/', checkUserSession, checkShift, async (req, res) => {
             'Update "account" SET status = \'ONLINE\' WHERE id=$1',
             [req.session.user.id]
           );
-          res.status(200).json(req.session.user);
+          res.status(200).json();
         }
       }
     } else {

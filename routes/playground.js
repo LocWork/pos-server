@@ -4,6 +4,8 @@ const helper = require('../utils/helpers');
 const pool = require('./../db');
 const { request } = require('./kdsMain');
 
+const randomstring = require('randomstring');
+
 router.post('/create', async (req, res) => {
   try {
     const { username, password, fullname, email, phone, status } = req.body;
@@ -23,6 +25,12 @@ router.post('/create', async (req, res) => {
 
 router.get('/forcast', (req, res) => {
   req.io.emit('demo', { msg: 'hello world' });
+  res.status(200).json({ msg: 'success' });
+});
+
+router.get('/uuid', (req, res) => {
+  const uniqeId = randomstring.generate(8);
+  console.log(uniqeId);
   res.status(200).json({ msg: 'success' });
 });
 
