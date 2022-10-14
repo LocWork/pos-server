@@ -9,8 +9,8 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 // route
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
-const mainPageRoute = require('./routes/mainPage');
-const waiterRoute = require('./routes/waiter');
+const tableOverview = require('./routes/tableOverview');
+const orderRoute = require('./routes/order');
 const playRoute = require('./routes/playground');
 //other
 // const cors = require('cors');
@@ -85,12 +85,27 @@ app.use('/logout', logoutRoute);
 // }
 
 // app.use(checkUserSession);
-app.use('/mainpage', mainPageRoute);
-app.use('/waiter', waiterRoute);
+app.use('/tableoverview', tableOverview);
+app.use('/order', orderRoute);
 app.use('/playground', playRoute);
 
 io.on('connection', (socket) => {
   console.log('A new user just connected');
+  socket.on('join-pos-location', (room) => {
+    var location = `POS-L-${room}`;
+    socket.join(location);
+    console.log(`you have join location: ${location}`);
+  });
+  socket.on('join-pos-table', (room) => {
+    var table = `POS-T-${room}`;
+    socket.join(table);
+    console.log(`you have join table: ${table}`);
+  });
+  socket.on('join-kds-location', (room) => {
+    var kds = `KDS-L-${room}`;
+    socket.join(kds);
+    console.log(`you have join table: ${table}`);
+  });
 });
 
 server.listen(PORT, () => {
