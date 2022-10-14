@@ -285,10 +285,14 @@ router.put(`/check/:id/info`, async (req, res) => {
   try {
     const { id } = req.params;
     const { guestname, cover } = req.body;
-    const updateInfomation = await pool.query(
-      `UPDATE "check" SET guestName = $1, cover = $2 WHERE id = $3`,
-      [guestname, cover, id]
-    );
+    if (req.session.user) {
+      const updateInfomation = await pool.query(
+        `UPDATE "check" SET guestName = $1, cover = $2, updaterId = $3, updateTime = CURRENT_TIMESTAMP  WHERE id = $4`,
+        [guestname, cover, req.session.user.id, id]
+      );
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
+    }
     // console.log(updateInfomation);
     res.status(200).json({ msg: 'Đã cập nhật thông tin' });
   } catch (error) {
@@ -317,10 +321,15 @@ router.put(`/check/:id/note`, async (req, res) => {
   try {
     const { id } = req.params;
     const { note } = req.body;
-    const updateInfomation = await pool.query(
-      `UPDATE "check" SET note = $1 WHERE id = $2`,
-      [note, id]
-    );
+    if (req.session.user) {
+      const updateInfomation = await pool.query(
+        `UPDATE "check" SET note = $1, updaterId = $2, updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
+        [note, req.session.user.id, id]
+      );
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
+    }
+
     res.status(200).json({ msg: 'Đã cập nhật thông tin' });
   } catch (error) {
     console.log(error);
@@ -477,23 +486,27 @@ router.get('/majorgroup/:id', async (req, res) => {
 router.put(`/check/:id/void`, async (req, res) => {
   try {
     const { id } = req.params;
-    const voidcheck = await pool.query(
-      `UPDATE "check" SET status = 'VOID' WHERE id = $1`,
-      [id]
-    );
-
-    const voidcheckdetail = await pool.query(
-      `UPDATE "checkdetail" SET status = 'VOID' WHERE checkid = $1`,
-      [id]
-    );
-    if (req.session.tableid) {
-      const updateTable = await pool.query(
-        `UPDATE "table" SET status = 'NOT_USE' WHERE id = $1 AND status = 'IN_USE'`,
-        [req.session.tableid]
+    if (req.session.user) {
+      const voidCheck = await pool.query(
+        `UPDATE "check" SET status = 'VOID', updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+        [req.session.user.id, id]
       );
+
+      const voidCheckDetail = await pool.query(
+        `UPDATE "checkdetail" SET status = 'VOID' WHERE checkid = $1`,
+        [id]
+      );
+      if (req.session.tableid) {
+        const updateTable = await pool.query(
+          `UPDATE "table" SET status = 'NOT_USE' WHERE id = $1 AND status = 'IN_USE'`,
+          [req.session.tableid]
+        );
+      }
+      await massViewUpdate();
+      res.status(200).json();
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
     }
-    await massViewUpdate();
-    res.status(200).json();
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -505,9 +518,45 @@ router.put(`/checkdetail/:id/void`, async (req, res) => {
   try {
     const { id } = req.params;
     const voidcheckdetail = await pool.query(
-      `UPDATE "checkdetail" SET status = 'VOID' WHERE id = $1`,
+      `UPDATE "checkdetail" SET status = 'VOID' WHERE id = $1 RETURNING checkid`,
       [id]
     );
+    if (req.session.user) {
+      const updateCheck = await pool.query(
+        `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+        [req.session.user.id, voidcheckdetail.rows[0].checkid]
+      );
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
+    }
+
+    await massViewUpdate();
+    res.status(200).json();
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+//transfer check detail
+router.put('/checkdetail/transfer', async (req, res) => {
+  try {
+    const { tocheckid, checkdetaillist } = req.body;
+    console.log(checkdetaillist);
+    for (var i = 0; i < checkdetaillist.length; i++) {
+      var transferCheckDetail = await pool.query(
+        `UPDATE checkdetail SET checkid = $1 WHERE id = $2 RETURNING checkid`,
+        [tocheckid, checkdetaillist[i].id]
+      );
+    }
+    if (req.session.user) {
+      const updateCheck = await pool.query(
+        `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+        [req.session.user.id, transferCheckDetail.rows[0].checkid]
+      );
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
+    }
     await massViewUpdate();
     res.status(200).json();
   } catch (error) {

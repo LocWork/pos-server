@@ -9,6 +9,7 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 // route
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
+const reassignRoute = require('./routes/reassign');
 const tableOverview = require('./routes/tableOverview');
 const orderRoute = require('./routes/order');
 const playRoute = require('./routes/playground');
@@ -87,6 +88,7 @@ app.use('/logout', logoutRoute);
 // app.use(checkUserSession);
 app.use('/tableoverview', tableOverview);
 app.use('/order', orderRoute);
+app.use('/reassign', reassignRoute);
 app.use('/playground', playRoute);
 
 io.on('connection', (socket) => {
