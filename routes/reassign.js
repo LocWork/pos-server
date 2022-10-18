@@ -12,7 +12,7 @@ async function isUserOnline(req, res, next) {
       FROM "account" AS A
       JOIN "role" AS R
       ON A.roleid = R.id
-      WHERE A.id = $1 AND R.name = 'WAITER' AND A.status = 'ONLINE' `,
+      WHERE A.id = $1 AND (R.name = 'WAITER' OR R.name ='CASHIER') AND A.status = 'ONLINE' `,
       [touserid]
     );
     if (waiter.rows[0]) {
@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
       FROM "account" AS A
       JOIN "role" AS R
       ON A.roleid = R.id
-      WHERE R.name = 'WAITER' AND A.status = 'ONLINE' AND A.id != $1`,
+      WHERE (R.name = 'WAITER' OR R.name ='CASHIER') AND A.status = 'ONLINE' AND A.id != $1`,
         [req.session.user.id]
       );
       res.status(200).json(waiterList.rows);
