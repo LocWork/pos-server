@@ -23,6 +23,25 @@ const randomCheckString = async (size) => {
   return result;
 };
 
+const randomBillString = async (size) => {
+  var x = false;
+  var result = '';
+  try {
+    do {
+      result = randomstring.generate(size);
+      var check = await pool.query(`SELECT id FROM "bill" WHERE billno = $1`, [
+        result,
+      ]);
+      if (check.rows[0] == null) {
+        x = true;
+      }
+    } while (x == false);
+  } catch (error) {
+    console.log(error);
+  }
+  return result;
+};
+
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt();
   return bcrypt.hash(password, salt);
@@ -145,6 +164,7 @@ module.exports = {
   errorMsgHandler,
   validatePassword,
   randomCheckString,
+  randomBillString,
   updateTableOverview,
   updateKitchen,
 };

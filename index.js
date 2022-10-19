@@ -13,6 +13,7 @@ const reassignRoute = require('./routes/reassign');
 const tableOverview = require('./routes/tableOverview');
 const orderRoute = require('./routes/order');
 const playRoute = require('./routes/playground');
+const searchRoute = require('./routes/search');
 const kitchenRoute = require('./routes/kitchen');
 //other
 // const cors = require('cors');
@@ -92,6 +93,7 @@ app.use('/order', orderRoute);
 app.use('/reassign', reassignRoute);
 app.use('/kitchen', kitchenRoute);
 app.use('/playground', playRoute);
+app.use('/search', searchRoute);
 
 io.on('connection', (socket) => {
   console.log('A new user just connected');

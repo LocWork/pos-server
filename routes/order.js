@@ -61,6 +61,24 @@ async function isTableInUse(req, res, next) {
   }
 }
 
+async function isCheckActive(req, res, next) {
+  try {
+    const { checkid } = req.body;
+    const check = await pool.query(
+      `SELECT id from "check" WHERE id = $1 AND status = 'ACTIVE'`,
+      [checkid]
+    );
+    if (check.rows[0]) {
+      next();
+    } else {
+      res.status(400).json({ msg: 'Không thể thêm món vào hóa đơn' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
 async function massViewUpdate(req, res) {
   try {
     req.io
@@ -115,7 +133,6 @@ async function kitchenUpdate(req, res) {
 
 async function isAllItemInStock(req, res, next) {
   try {
-    const { checkid } = req.params;
     for (var i = 0; i < req.body.length; i++) {
       var detail = req.body[i];
       var itemCheck = await pool.query(
@@ -163,7 +180,7 @@ async function updateRunningSince(req, res, next) {
   }
 }
 
-//Get order page component and Open table
+//OPEN table, GET component, and VIEW check/checkdetail
 router.get('/table/:id/check/', isTableInUse, async (req, res) => {
   try {
     //Get system tax value
@@ -176,6 +193,7 @@ router.get('/table/:id/check/', isTableInUse, async (req, res) => {
       SELECT id, name
       FROM majorgroup
       WHERE status = 'ACTIVE'
+      ORDER BY id ASC
       `
     );
     const getMenuList = await pool.query(
@@ -208,7 +226,7 @@ router.get('/table/:id/check/', isTableInUse, async (req, res) => {
     for (var i = 0; i < getCheck.rows.length; i++) {
       var checkDetailList = await pool.query(
         `
-       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded
+       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, D.amount
        FROM "check" AS C
  	     JOIN checkdetail AS D
        ON C.id = D.checkid
@@ -255,7 +273,7 @@ router.get('/table/:id/check/', isTableInUse, async (req, res) => {
   }
 });
 
-//Get check and check detail;
+//Get check and check detail for reload;
 router.get('/check/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -264,7 +282,7 @@ router.get('/check/:id', async (req, res) => {
       FROM "check" AS C
       JOIN "table" AS T
       ON C.tableid = T.id
-      WHERE C.status = 'ACTIVE' AND T.status = 'IN_USE' AND T.id = $1
+      WHERE C.status = 'ACTIVE' AND T.status = 'IN_USE' AND C.id = $1
       LIMIT 1
       `,
       [id]
@@ -275,7 +293,7 @@ router.get('/check/:id', async (req, res) => {
     for (var i = 0; i < getCheck.rows.length; i++) {
       var checkDetailList = await pool.query(
         `
-       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded
+       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, D.amount
        FROM "check" AS C
  	     JOIN checkdetail AS D
        ON C.id = D.checkid
@@ -323,6 +341,7 @@ router.get('/check/:id', async (req, res) => {
 router.get(`/check/:id/info`, async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(req.session.checkid);
     const checkInfo = await pool.query(
       `SELECT guestName, cover FROM "check" WHERE id = $1`,
       [id]
@@ -334,21 +353,22 @@ router.get(`/check/:id/info`, async (req, res) => {
   }
 });
 
-//Add guestname and cover
-router.put(`/check/info`, async (req, res) => {
+//UPDATE guestname and cover
+router.put(`/check/:id/info`, async (req, res) => {
   try {
-    const { id, guestname, cover } = req.body;
+    const { id } = req.params;
+    const { guestname, cover } = req.body;
     if (req.session.user) {
       const updateInfomation = await pool.query(
         `UPDATE "check" SET guestName = $1, cover = $2, updaterId = $3, updateTime = CURRENT_TIMESTAMP  WHERE id = $4`,
         [guestname, cover, req.session.user.id, id]
       );
       await overViewUpdate(req, res);
+      res.status(200).json({ msg: 'Thông tin đã được cập nhật!' });
     } else {
       res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
     }
     // console.log(updateInfomation);
-    res.status(200).json({ msg: 'Đã cập nhật thông tin' });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -371,9 +391,10 @@ router.get(`/check/:id/note`, async (req, res) => {
 });
 
 // Add check note
-router.put(`/check/note`, async (req, res) => {
+router.put(`/check/:id/note`, async (req, res) => {
   try {
-    const { id, note } = req.body;
+    const { id } = req.params;
+    const { note } = req.body;
     if (req.session.user) {
       const updateInfomation = await pool.query(
         `UPDATE "check" SET note = $1, updaterId = $2, updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
@@ -390,7 +411,7 @@ router.put(`/check/note`, async (req, res) => {
   }
 });
 
-//View special request
+//GET specialrequest list
 router.get(`/view/specialrequest/:itemid`, async (req, res) => {
   try {
     const { itemid } = req.params;
@@ -411,17 +432,17 @@ router.get(`/view/specialrequest/:itemid`, async (req, res) => {
   }
 });
 
-//Add item into guest check;
+//SEND ORDER
 router.post(
   '/check/add',
+  isCheckActive,
   isAllItemInStock,
   updateRunningSince,
   async (req, res) => {
     try {
-      const { checkid } = req.body;
-      for (var i = 0; i < req.body.length; i++) {
-        var detail = req.body[i];
-
+      const { checkid, itemlist } = req.body;
+      for (var i = 0; i < itemlist.length; i++) {
+        var detail = itemlist[i];
         var checkDetailId = await pool.query(
           `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,note,isreminded,status) 
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING') RETURNING id`,
@@ -483,7 +504,7 @@ router.post(
   }
 );
 
-//GET menu list item
+//GET menu item list
 router.get('/menu/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -551,9 +572,9 @@ router.get('/majorgroup/:id', async (req, res) => {
 });
 
 //Gửi order reminder
-router.put('/detail/remind', async (req, res) => {
+router.put('/detail/:id/remind', async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const remind = await pool.query(
       `UPDATE checkdetail SET isReminded = true WHERE id=$1 AND status = 'WAITING'`,
       [id]
@@ -587,7 +608,7 @@ router.put(`/check/void`, async (req, res) => {
         );
       }
       await massViewUpdate(req, res);
-      res.status(200).json();
+      res.status(200).json({ msg: 'Đã hủy check' });
     } else {
       res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
     }
@@ -598,9 +619,9 @@ router.put(`/check/void`, async (req, res) => {
 });
 
 //void checkdetail
-router.put(`/checkdetail/void`, async (req, res) => {
+router.put(`/checkdetail/:id/void`, async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const voidcheckdetail = await pool.query(
       `UPDATE "checkdetail" SET status = 'VOID' WHERE id = $1 RETURNING checkid`,
       [id]
@@ -616,6 +637,264 @@ router.put(`/checkdetail/void`, async (req, res) => {
 
     await massViewUpdate(req, res);
     res.status(200).json();
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+router.get('/paymentmethod', async (req, res) => {
+  try {
+    const list = await pool.query(
+      `SELECT id,name from paymentmethod WHERE status='ACTIVE';`
+    );
+    res.status(200).json(list.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+router.post('/check/process', async (req, res) => {
+  try {
+    const { checkid, paymentlist, detaillist } = req.body;
+    const billno = await helpers.randomBillString(8);
+    const getCheck = await pool.query(
+      `
+    SELECT C.id AS checkid, C.guestname,C.subtotal,C.totaltax,C.totalamount, C.note, C.tableid 
+    FROM "check" AS C
+    JOIN "table" AS T
+    ON T.id = C.tableid
+    WHERE C.id = $1 AND C.status = 'ACTIVE' AND T.status = 'IN_USE';
+    `,
+      [checkid]
+    );
+    if (!getCheck.rows[0]) {
+      res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
+    } else {
+      const createBill = await pool.query(
+        `
+      INSERT INTO "bill"(checkid,billno,guestname,subtotal,totaltax,totalamount,note,creatorId,creationTime, status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP, 'CLOSED') RETURNING id
+    `,
+        [
+          getCheck.rows[0].checkid,
+          billno,
+          getCheck.rows[0].guestname,
+          getCheck.rows[0].subtotal,
+          getCheck.rows[0].totaltax,
+          getCheck.rows[0].totalamount,
+          getCheck.rows[0].note,
+          req.session.user.id,
+        ]
+      );
+      if (createBill.rows[0]) {
+        //insert payment method
+        for (var i = 0; i < paymentlist.length; i++) {
+          var payment = await pool.query(
+            `
+          INSERT INTO billpayment(billid,paymentmethodid,paymentmethodname,amountreceive) VALUES($1,$2,$3,$4)
+        `,
+            [
+              createBill.rows[0].id,
+              paymentlist[i].id,
+              paymentlist[i].name,
+              paymentlist[i].amount,
+            ]
+          );
+        }
+
+        for (var x = 0; x < detaillist.length; x++) {
+          var detail = await pool.query(
+            `
+            INSERT INTO billdetail(billid,itemid,itemname,itemprice,quantity,subtotal,taxamount,amount) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+          `,
+            [
+              createBill.rows[0].id,
+              detaillist[x].itemid,
+              detaillist[x].itemname,
+              detaillist[x].itemprice,
+              detaillist[x].quantity,
+              detaillist[x].subtotal,
+              detaillist[x].taxamount,
+              detaillist[x].amount,
+            ]
+          );
+        }
+        const updateTable = await pool.query(
+          `UPDATE "table" SET status = 'NOT_USE' WHERE id = $1`,
+          [getCheck.rows[0].tableid]
+        );
+
+        const updateCheck = await pool.query(
+          `UPDATE "check" SET status = 'CLOSED', updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+          [req.session.user.id, checkid]
+        );
+        await massViewUpdate(req, res);
+        res.status(200).json({ msg: 'Thanh toán thành công' });
+      } else {
+        res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+//GET check and detail for refund
+router.get('/check/:id/refund', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getCheck = await pool.query(
+      `SELECT C.id AS checkid,C.checkno,(C.subtotal * -1) AS subtotal,(C.totalTax * -1) AS totaltax, (C.totalamount * -1) AS totalamount, C.creationtime::time(0)
+      FROM "check" AS C
+      JOIN "table" AS T
+      ON C.tableid = T.id
+      WHERE C.status = 'CLOSED' AND C.id = $1
+      LIMIT 1;
+      `,
+      [id]
+    );
+
+    var checkInfo = [];
+
+    for (var i = 0; i < getCheck.rows.length; i++) {
+      var checkDetailList = await pool.query(
+        `
+       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, (D.amount * -1) AS amount
+       FROM "check" AS C
+ 	     JOIN checkdetail AS D
+       ON C.id = D.checkid
+       JOIN item AS I
+       ON D.itemid = I.id
+       WHERE D.status != 'VOID' AND C.id = $1
+       ORDER BY D.id ASC;
+       `,
+        [getCheck.rows[0].checkid]
+      );
+      var temp = [];
+      for (var x = 0; x < checkDetailList.rows.length; x++) {
+        var specialRequestList = await pool.query(
+          `
+          SELECT S.name
+          FROM checkitemspecialrequest AS CSP
+          JOIN checkdetail AS D
+          ON CSP.checkdetailid = D.id
+          JOIN specialrequest AS S
+          ON CSP.specialrequestid = S.id
+          WHERE D.id = $1
+          `,
+          [checkDetailList.rows[x].checkdetailid]
+        );
+
+        temp.push(
+          _.merge(checkDetailList.rows[x], {
+            specialrequest: specialRequestList.rows,
+          })
+        );
+      }
+    }
+    checkInfo = _.merge(getCheck.rows[0], { checkdetail: temp });
+
+    res.status(200).json({
+      check: checkInfo,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+router.post('/check/refund', async (req, res) => {
+  try {
+    const { checkid } = req.body;
+    const billno = await helpers.randomBillString(8);
+    const getCheck = await pool.query(
+      `
+    SELECT id AS checkid, guestname,(subtotal * -1) AS subtotal,(totaltax * -1) AS totaltax,(totalamount * -1) AS totalamount, note
+    FROM "check"
+    WHERE id = $1 and status = 'CLOSED';
+    `,
+      [checkid]
+    );
+    if (!getCheck.rows[0]) {
+      res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
+    } else {
+      const createBill = await pool.query(
+        `
+      INSERT INTO "bill"(checkid,billno,guestname,subtotal,totaltax,totalamount,note,creatorId,creationTime, status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP, 'REFUND') RETURNING id
+    `,
+        [
+          getCheck.rows[0].checkid,
+          billno,
+          getCheck.rows[0].guestname,
+          getCheck.rows[0].subtotal,
+          getCheck.rows[0].totaltax,
+          getCheck.rows[0].totalamount,
+          getCheck.rows[0].note,
+          req.session.user.id,
+        ]
+      );
+      if (createBill.rows[0]) {
+        const paymentlist = await pool.query(
+          `
+      SELECT BP.paymentmethodid AS id, BP.paymentmethodname AS name, (BP.amountreceive * -1) AS amount
+      FROM "billpayment" AS BP
+      JOIN bill AS B
+      ON B.id = BP.billid
+      WHERE B.checkid = $1;
+      `,
+          [checkid]
+        );
+
+        //insert payment method
+        for (var i = 0; i < paymentlist.rows.length; i++) {
+          var payment = await pool.query(
+            `
+          INSERT INTO billpayment(billid,paymentmethodid,paymentmethodname,amountreceive) VALUES($1,$2,$3,$4)
+        `,
+            [
+              createBill.rows[0].id,
+              paymentlist.rows[i].id,
+              paymentlist.rows[i].name,
+              paymentlist.rows[i].amount,
+            ]
+          );
+        }
+
+        const detaillist = await pool.query(
+          ` 
+        SELECT D.itemid, I.name AS itemname, D.itemprice, D.quantity, (D.subtotal * -1) AS subtotal, (D.taxamount *-1) AS taxamount,(D.amount * -1) AS amount
+        FROM checkdetail AS D
+        JOIN item AS I
+        ON D.itemid = I.id
+        WHERE D.checkid = $1 AND D.status != 'VOID';
+        `,
+          [checkid]
+        );
+
+        for (var x = 0; x < detaillist.rows.length; x++) {
+          var detail = await pool.query(
+            `
+            INSERT INTO billdetail(billid,itemid,itemname,itemprice,quantity,subtotal,taxamount,amount) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
+          `,
+            [
+              createBill.rows[0].id,
+              detaillist.rows[x].itemid,
+              detaillist.rows[x].itemname,
+              detaillist.rows[x].itemprice,
+              detaillist.rows[x].quantity,
+              detaillist.rows[x].subtotal,
+              detaillist.rows[x].taxamount,
+              detaillist.rows[x].amount,
+            ]
+          );
+        }
+        res.status(200).json({ msg: 'Hoàn tiền thành công' });
+      } else {
+        res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
+      }
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });

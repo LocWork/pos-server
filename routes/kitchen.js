@@ -168,7 +168,6 @@ router.post('/add/outofstock/', async (req, res) => {
         `SELECT itemid FROM itemoutofstock WHERE itemid = $1`,
         [itemlist[i].id]
       );
-      console.log(checkitem.rows);
       if (checkitem.rows[0] == null) {
         var additem = await pool.query(
           `INSERT INTO itemoutofstock(itemid) VALUES($1) `,
@@ -201,9 +200,10 @@ router.delete('/remove/outofstock/', async (req, res) => {
 });
 
 //Notify item is ready;
-router.put('/notify/ready/', async (req, res) => {
+router.put('/check/:id/ready/', async (req, res) => {
   try {
-    const { checkid, detaillist } = req.body;
+    const { id } = req.params;
+    const { detaillist } = req.body;
     const location = await pool.query(
       `
     SELECT L.id
@@ -214,22 +214,20 @@ router.put('/notify/ready/', async (req, res) => {
     ON L.id = T.locationid
     WHERE C.id = $1;
     `,
-      [checkid]
+      [id]
     );
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
-        `UPDATE checkdetail SET status = 'READY' WHERE id = $1 AND status = 'WAITING'`,
-        [detaillist[i].id]
+        `UPDATE checkdetail SET status = 'READY', completiontime = (NOW() - (SELECT runningsince::time FROM "check" WHERE id = $1 LIMIT 1)) WHERE id = $2 AND status = 'WAITING'`,
+        [id, detaillist[i].id]
       );
     }
-    console.log(location.rows[0]);
     if (location.rows[0] != null) {
       await massViewUpdate(location.rows[0].id, req, res);
+      res.status(200).json();
     } else {
       res.status(400).json({ msg: 'Không cập nhật được giao diện!' });
     }
-
-    res.status(200).json();
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -237,9 +235,10 @@ router.put('/notify/ready/', async (req, res) => {
 });
 
 //notify item recall
-router.put('/notify/recall/', async (req, res) => {
+router.put('/check/:id/recall/', async (req, res) => {
   try {
-    const { checkid, detaillist } = req.body;
+    const { id } = req.params;
+    const { detaillist } = req.body;
     const location = await pool.query(
       `
     SELECT L.id
@@ -250,7 +249,7 @@ router.put('/notify/recall/', async (req, res) => {
     ON L.id = T.locationid
     WHERE C.id = $1;
     `,
-      [checkid]
+      [id]
     );
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(

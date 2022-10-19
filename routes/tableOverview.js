@@ -4,7 +4,29 @@ const pool = require('../db');
 const sob = require('../staticObj');
 const _ = require('lodash');
 const helpers = require('../utils/helpers');
-//Get locations
+
+async function massViewUpdate(req, res) {
+  try {
+    req.io
+      .to('POS-L-0')
+      .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+    if (req.session.locationid && req.session.locationid != 0) {
+      req.io
+        .to(`POS-L-${req.session.locationid}`)
+        .emit(
+          'update-pos-tableOverview',
+          await helpers.updateTableOverview(req.session.locationid)
+        );
+    }
+    req.io
+      .to(`KDS-L-0`)
+      .emit('update-kds-kitchen', await helpers.updateKitchen());
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
 async function isFirstTableInUse(req, res, next) {
   try {
     const { id1 } = req.params;
@@ -89,20 +111,26 @@ async function createCheck(req, res, next) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-
+//GET list of location
 router.get('/', async (req, res) => {
   try {
-    const locations = await pool.query(
+    if (req.session.checkid) {
+      req.session.checkid = null;
+    }
+    if (req.session.tableid) {
+      req.session.tableid = null;
+    }
+    const list = await pool.query(
       `SELECT id as locationId, name FROM "location" WHERE status != 'INACTIVE'`
     );
-    res.status(200).json(locations.rows);
+    res.status(200).json(list.rows);
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 });
 
-//join a location and View location’s table
+//UC View location’s table
 router.get('/location/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -125,14 +153,10 @@ router.get('/location/:id', async (req, res) => {
         ;`,
         [id]
       );
-      if (tables.rows) {
-        res.status(200).json({
-          locationId: id,
-          tables: tables.rows,
-        });
-      } else {
-        res.status(400).json({ msg: 'Lỗi hệ thống!' });
-      }
+      res.status(200).json({
+        locationId: id,
+        tables: tables.rows,
+      });
     } else {
       const tables =
         await pool.query(`SELECT T.id, T.status, T.name AS tableName, C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
@@ -149,14 +173,10 @@ router.get('/location/:id', async (req, res) => {
         ORDER BY
         T.id
         ;`);
-      if (tables.rows) {
-        res.status(200).json({
-          locationId: id,
-          tables: tables.rows,
-        });
-      } else {
-        res.status(400).json({ msg: 'Lỗi hệ thống!' });
-      }
+      res.status(200).json({
+        locationId: id,
+        tables: tables.rows,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -211,9 +231,10 @@ router.get(
 );
 
 //transfer check detail
-router.put('/checkdetail/transfer', async (req, res) => {
+router.put('/transfer/checkdetail/check/:id', async (req, res) => {
   try {
-    const { id, checkdetaillist } = req.body;
+    const { id } = req.params;
+    const { checkdetaillist } = req.body;
     for (var i = 0; i < checkdetaillist.length; i++) {
       var transferCheckDetail = await pool.query(
         `UPDATE checkdetail SET checkid = $1 WHERE id = $2 RETURNING checkid`,
@@ -228,7 +249,7 @@ router.put('/checkdetail/transfer', async (req, res) => {
     } else {
       res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
     }
-    // await massViewUpdate();
+    await massViewUpdate();
     res.status(200).json();
   } catch (error) {
     console.log(error);
