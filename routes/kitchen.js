@@ -3,19 +3,44 @@ const router = Router();
 const pool = require('../db');
 const _ = require('lodash');
 const helpers = require('../utils/helpers');
+const sob = require('../staticObj');
+
+async function checkSessionAndRole(req, res, next) {
+  try {
+    if (req.session.user && req.session.shiftId) {
+      if (req.session.user.role == sob.KITCHEN) {
+        next();
+      } else {
+        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+      }
+    } else {
+      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+router.use(checkSessionAndRole);
 
 async function massViewUpdate(id, req, res) {
   try {
-    req.io
-      .to('POS-L-0')
-      .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-    if (id && id != 0) {
+    if (req.io.sockets.adapter.rooms.get(`POS-L-0`).size > 0) {
       req.io
-        .to(`POS-L-${id}`)
-        .emit(
-          'update-pos-tableOverview',
-          await helpers.updateTableOverview(id)
-        );
+        .to('POS-L-0')
+        .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+    }
+
+    if (req.io.sockets.adapter.rooms.get(`POS-L-${id}`).size > 0) {
+      if (id && id != 0) {
+        req.io
+          .to(`POS-L-${id}`)
+          .emit(
+            'update-pos-tableOverview',
+            await helpers.updateTableOverview(id)
+          );
+      }
     }
     req.io
       .to(`KDS-L-0`)
@@ -200,7 +225,7 @@ router.delete('/remove/outofstock/', async (req, res) => {
 });
 
 //Notify item is ready;
-router.put('/check/:id/ready/', async (req, res) => {
+router.put('/notify/ready/', async (req, res) => {
   try {
     const { id } = req.params;
     const { detaillist } = req.body;

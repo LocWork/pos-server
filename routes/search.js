@@ -4,6 +4,25 @@ const pool = require('../db');
 const _ = require('lodash');
 const helpers = require('../utils/helpers');
 
+async function checkSessionAndRole(req, res, next) {
+  try {
+    if (req.session.user && req.session.shiftId) {
+      if (req.session.user.role == sob.CASHIER) {
+        next();
+      } else {
+        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+      }
+    } else {
+      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+router.use(checkSessionAndRole);
+
 router.get(`/checklist`, async (req, res) => {
   try {
     const checkList = await pool.query(`

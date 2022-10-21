@@ -1,5 +1,3 @@
--- Database: restaurant
-
 DROP DATABASE IF EXISTS restaurant;
 
  CREATE DATABASE restaurant
@@ -22,7 +20,7 @@ Create TYPE bill_status AS ENUM ('CLOSED','REFUND');
 
 CREATE TABLE role (
 	id serial primary key,
-	name text not null
+	name text UNIQUE not null
 );
 	
 CREATE TABLE account (
@@ -31,8 +29,8 @@ CREATE TABLE account (
   password text NOT NULL,
   fullName text NOT NULL,
   avatar text DEFAULT NULL,
-  email text NOT NULL,
-  phone text NOT NULL,
+  email text unique NOT NULL,
+  phone text unique NOT NULL,
   status user_status default 'OFFLINE',
   roleId integer NOT NULL references role(id)
 );
@@ -82,7 +80,7 @@ CREATE TABLE "table" (
 CREATE TABLE "check" (
   id serial primary key,
   shiftId integer NOT NULL references shift(id),
-  waiterId integer NOT NULL references account(id),
+  accountId integer NOT NULL references account(id),
   tableId int NOT NULL references "table"(id),
   voidReasonId int DEFAULT NULL references voidreason(id),
   checkNo text UNIQUE NOT NULL,
@@ -96,14 +94,18 @@ CREATE TABLE "check" (
   creationTime timestamp with time zone NOT NULL,
   updaterId integer DEFAULT NULL,
   updateTime timestamp with time zone DEFAULT NULL,
+  runningSince timestamp with time zone NOT NULL
   status check_status NOT NULL default 'ACTIVE'
 );
+
+ALTER TABLE "check"
+ADD COLUMN runningSince timestamp with time zone DEFAULT NULL;
 
 CREATE TABLE bill (
   id serial primary key,
   checkId integer NOT NULL references "check"(id),
   billNo text unique NOT NULL,
-  guestName text NOT NULL,
+  guestName text DEFAULT NULL,
   subtotal integer NOT NULL,
   totalTax integer NOT NULL,
   totalAmount integer NOT NULL,
@@ -167,10 +169,9 @@ CREATE TABLE checkdetail (
   amount integer NOT NULL,
   note text DEFAULT NULL,
   isReminded boolean NOT NULL,
-  status checkdetail_status NOT NULL default 'WAITING'
+  status checkdetail_status NOT NULL default 'WAITING',
+  completionTime time with time zone default NULL
 );
-
-
 
 CREATE TABLE specialrequest (
   id serial primary key,
@@ -179,7 +180,7 @@ CREATE TABLE specialrequest (
   status basic_status NOT NULL default 'ACTIVE'
 );
 
-CREATE TABLE checkitemspecialrequest (
+CREATE TABLE checkdetailspecialrequest (
   id serial primary key,
   checkDetailId integer NOT NULL references checkdetail(id) ON DELETE CASCADE,
   specialRequestId int NOT NULL references specialrequest(id)
@@ -187,7 +188,7 @@ CREATE TABLE checkitemspecialrequest (
 
 CREATE TABLE itemoutofstock (
   id serial primary key,
-  itemId integer NOT NULL references item(id)
+  itemId integer UNIQUE NOT NULL references item(id)
 );
 
 CREATE TABLE mealtype (
@@ -224,50 +225,11 @@ CREATE TABLE "sessions"(
 	sid text primary key NOT NULL,
 	sess json NOT NULL,
 	expired TIMESTAMP with time zone NOT NULL
-)
+);
 
+--Basic
 INSERT INTO role("name") VALUES('ADMIN');
 INSERT INTO role("name") VALUES('MANAGER');
 INSERT INTO role("name") VALUES('WAITER');
 INSERT INTO role("name") VALUES('CASHIER');
 INSERT INTO role("name") VALUES('KITCHEN_STAFF');
-
---password = 123qwe
-INSERT INTO account(username,password,fullname,email,phone,status,roleid) VALUES(
-	'admin','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','admin user','default@gmail.com','0000000000','OFFLINE',(SELECT id FROM role WHERE name = 'ADMIN'));
-INSERT INTO account(username,password,fullname,email,phone,status,roleid) VALUES(
-	'waiter','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','waiter user','default@gmail.com','0000000000','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'));
-INSERT INTO account(username,password,fullname,email,phone,status,roleid) VALUES(
-	'cashier','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','cashier user','default@gmail.com','0000000000','OFFLINE',(SELECT id FROM role WHERE name = 'CASHIER'));
-INSERT INTO account(username,password,fullname,email,phone,status,roleid) VALUES(
-	'kitchen','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','kitchen user','default@gmail.com','0000000000','OFFLINE',(SELECT id FROM role WHERE name = 'KITCHEN'));
-
-INSERT INTO systemsetting(restaurantname,address,taxvalue) VALUES('Restaurant A','Default Address', 10);
-
-INSERT INTO paymentmethod("name",status) VALUES('Tiền mặt','ACTIVE');
-INSERT INTO paymentmethod("name",status) VALUES('Thẻ VISA','ACTIVE');
-INSERT INTO paymentmethod("name",status) VALUES('Thẻ Mastercard','ACTIVE');
-INSERT INTO paymentmethod("name",status) VALUES('Séc ngân hàng','ACTIVE');
-INSERT INTO paymentmethod("name",status) VALUES('MoMo','ACTIVE');
-INSERT INTO paymentmethod("name",status) VALUES('ZaloPay','ACTIVE');
-
-INSERT INTO majorgroup("name",status) VALUES('Khai vị','ACTIVE');
-INSERT INTO majorgroup("name",status) VALUES('Đồ uống','ACTIVE');
-INSERT INTO majorgroup("name",status) VALUES('Món lẩu','ACTIVE');
-INSERT INTO majorgroup("name",status) VALUES('Món nướng','ACTIVE');
-INSERT INTO majorgroup("name",status) VALUES('Món thêm','ACTIVE');
-INSERT INTO majorgroup("name",status) VALUES('Tráng miệng','ACTIVE');
-
-INSERT INTO mealtype("name",status) VALUES('Bữa sáng','ACTIVE');
-INSERT INTO mealtype("name",status) VALUES('Bữa trưa','ACTIVE');
-INSERT INTO mealtype("name",status) VALUES('Bữa tối','ACTIVE');
-INSERT INTO mealtype("name",status) VALUES('Bữa ăn nhẹ','ACTIVE');
-
-INSERT INTO voidreason("name",status) VALUES('Khách hủy món','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Lỗi người dùng','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Lỗi hệ thống','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Hết hàng','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Nguyên nhân khác','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Nhầm món ăn hoặc số lượng','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Chuyển món sai','ACTIVE');
-INSERT INTO voidreason("name",status) VALUES('Khách phàn nàn','ACTIVE');

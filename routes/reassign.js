@@ -3,6 +3,28 @@ const session = require('express-session');
 const router = Router();
 const pool = require('../db');
 
+async function checkSessionAndRole(req, res, next) {
+  try {
+    if (req.session.user && req.session.shiftId) {
+      if (
+        req.session.user.role == sob.WAITER ||
+        req.session.user.role == sob.CASHIER
+      ) {
+        next();
+      } else {
+        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+      }
+    } else {
+      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+// router.use(checkSessionAndRole);
+
 async function isUserOnline(req, res, next) {
   try {
     const { touserid } = req.body;

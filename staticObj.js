@@ -5,6 +5,7 @@ class sob {
   static KITCHEN = 'KITCHEN_STAFF';
   static IN_USE = 'IN_USE';
   static NOT_USE = 'NOT_USE';
+  static ACTIVE = 'ACTIVE';
 }
 
 module.exports = sob;
