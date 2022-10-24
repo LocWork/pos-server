@@ -1,4 +1,4 @@
-const { Router } = require('express');
+const { Router, query } = require('express');
 const router = Router();
 const pool = require('../db');
 const sob = require('../staticObj');
@@ -6,19 +6,25 @@ const _ = require('lodash');
 const helpers = require('../utils/helpers');
 const { check } = require('express-validator');
 
-async function checkSessionAndRole(req, res, next) {
+async function checkRoleCashier(req, res, next) {
   try {
-    if (req.session.user && req.session.shiftId) {
-      if (
-        req.session.user.role == sob.WAITER ||
-        req.session.user.role == sob.CASHIER
-      ) {
-        next();
-      } else {
-        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
-      }
+    if (req.session.user.role == sob.CASHIER) {
+      next();
     } else {
-      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function checkRoleWaiter(req, res, next) {
+  try {
+    if (req.session.user.role == sob.WAITER) {
+      next();
+    } else {
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
     }
   } catch (error) {
     console.log(error);
@@ -48,9 +54,32 @@ async function isCheckActive(req, res, next) {
   }
 }
 
+async function canItemTransfer(req, res, next) {
+  try {
+    const { checkdetaillist } = req.body;
+    var flag = true;
+    for (var i = 0; i < checkdetaillist.length; i++) {
+      var item = await pool.query(
+        `SELECT id FROM checkdetail WHERE id = $1 AND (status != 'VOID' AND status != 'RECALL')`,
+        [checkdetaillist[i].id]
+      );
+      if (!item.rows[0]) {
+        flag = false;
+      }
+    }
+    if (flag == false) {
+      res.status(400).json('Không thể chuyển món do thông tin đã thay đổi');
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
 async function massViewUpdate(req, res) {
   try {
-    console.log(req.io.sockets.adapter.rooms.get(`POS-L-0`).size);
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
@@ -87,7 +116,7 @@ async function isFirstTableInUse(req, res, next) {
         if (tableCheck.rows[0]) {
           next();
         } else {
-          res.status(400).json({ msg: 'Bàn không còn check!' });
+          res.status(400).json({ msg: 'Bàn không còn đơn!' });
         }
       } else {
         res.status(400).json({ msg: 'Bàn hiện không hoạt động!' });
@@ -155,8 +184,6 @@ async function createCheck(req, res, next) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-//Check session and role
-// router.use(checkSessionAndRole);
 
 //GET list of location
 router.get('/', async (req, res) => {
@@ -171,7 +198,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-//UC View location’s table
+//UC View location table
 router.get('/location/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,7 +209,7 @@ router.get('/location/:id', async (req, res) => {
         FROM "location" AS L
         LEFT JOIN "table" AS T
         ON L.id = T.locationid
-        LEFT JOIN (SELECT id,tableid,totalamount,cover FROM "check" WHERE status ='ACTIVE' LIMIT 1) AS C
+        LEFT JOIN (SELECT id,tableid,totalamount,cover FROM "check" WHERE status ='ACTIVE') AS C
         ON T.id = C.tableid
         LEFT JOIN checkdetail AS D
         ON C.id = D.checkid
@@ -200,7 +227,7 @@ router.get('/location/:id', async (req, res) => {
       });
     } else {
       const tables =
-        await pool.query(`SELECT T.id, T.status, T.name AS tableName, C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
+        await pool.query(`SELECT T.id, T.status, T.name AS tableName,C.id as checkid ,C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
         FROM "location" AS L
         LEFT JOIN "table" AS T
         ON L.id = T.locationid
@@ -210,7 +237,7 @@ router.get('/location/:id', async (req, res) => {
         ON C.id = D.checkid
         WHERE T.status != 'INACTIVE' AND L.status != 'INACTIVE'
         GROUP BY
-        T.id, C.totalamount, C.cover
+        T.id, C.totalamount, C.cover, C.id
         ORDER BY
         T.id
         ;`);
@@ -275,6 +302,7 @@ router.get(
 router.put(
   '/transfer/checkdetail/check/:id',
   isCheckActive,
+  canItemTransfer,
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -285,16 +313,21 @@ router.put(
           [id, checkdetaillist[i].id]
         );
       }
-      if (req.session.user) {
-        const updateCheck = await pool.query(
+
+      if (transferCheckDetail.rows[0]) {
+        const updateCheckTo = await pool.query(
+          `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+          [req.session.user.id, id]
+        );
+        const updateCheckFrom = await pool.query(
           `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
           [req.session.user.id, transferCheckDetail.rows[0].checkid]
         );
+        await massViewUpdate(req, res);
+        res.status(200).json({ msg: 'Món đã được chuyển đi' });
       } else {
-        res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
+        res.status(400).json({ msg: 'Không tìm thấy thông tin hóa đơn!' });
       }
-      await massViewUpdate();
-      res.status(200).json();
     } catch (error) {
       console.log(error);
       res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -319,22 +352,23 @@ router.put(
         `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
         [id2]
       );
-
+      console.log(firstTableCheck.rows[0]);
+      console.log(secondTableCheck.rows[0]);
       if (firstTableCheck.rows[0] && secondTableCheck.rows[0]) {
         const transferTable = await pool.query(
           `UPDATE checkdetail SET checkid = $1 WHERE checkid = $2`,
-          [secondTableCheck.rows[0].id],
-          firstTableCheck.rows[0].id
+          [secondTableCheck.rows[0].id, firstTableCheck.rows[0].id]
         );
         const deleteCheck = await pool.query(
           `DELETE FROM "check" WHERE id = $1`,
           [firstTableCheck.rows[0].id]
         );
+        console.log('hello');
         const updateTable = await pool.query(
           `UPDATE "table" SET status ='NOT_USE' WHERE id = $1`,
           [id1]
         );
-        await massViewUpdate();
+        await massViewUpdate(req, res);
         res.status(200).json();
       } else {
         res.status(400).json('Không thể chuyển bàn');

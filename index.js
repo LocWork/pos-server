@@ -54,46 +54,12 @@ app.use(
     store,
   })
 );
-// app.use(
-//   session({
-//     secret: 'POSRES',
-//     resave: false,
-//     saveUninitialized: false,
-//     cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
-//   })
-// );
 
 //IO
-app.use(function (request, response, next) {
-  request.io = io;
+app.use(function (req, res, next) {
+  req.io = io;
   next();
 });
-
-app.use('/login', loginRoute);
-app.use('/logout', logoutRoute);
-
-// async function checkUserSession(req, res, next) {
-//   try {
-//     if (req.session.user) {
-//       next();
-//     } else {
-//       res.status(401).json({ msg: 'Xin đăng nhập lại vào hệ thống' });
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res
-//       .status(400)
-//       .json({ msg: 'Lỗi hệ thống, không thể kiểm tra người dùng!' });
-//   }
-// }
-
-// app.use(checkUserSession);
-app.use('/tableoverview', tableOverview);
-app.use('/order', orderRoute);
-app.use('/reassign', reassignRoute);
-app.use('/kitchen', kitchenRoute);
-app.use('/playground', playRoute);
-app.use('/search', searchRoute);
 
 io.on('connection', (socket) => {
   console.log('A new user just connected');
@@ -109,6 +75,32 @@ io.on('connection', (socket) => {
     console.log(`you have join kds location: ${kds}`);
   });
 });
+
+app.use('/login', loginRoute);
+app.use('/logout', logoutRoute);
+
+async function checkUserSession(req, res, next) {
+  try {
+    if (req.session.user && req.session.shiftId) {
+      next();
+    } else {
+      res.status(400).json({ msg: 'Xin đăng nhập lại vào hệ thống' });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(400)
+      .json({ msg: 'Lỗi hệ thống, không thể kiểm tra người dùng!' });
+  }
+}
+
+app.use(checkUserSession);
+app.use('/tableoverview', tableOverview);
+app.use('/order', orderRoute);
+app.use('/reassign', reassignRoute);
+app.use('/kitchen', kitchenRoute);
+app.use('/playground', playRoute);
+app.use('/search', searchRoute);
 
 server.listen(PORT, () => {
   console.log('Server running...');

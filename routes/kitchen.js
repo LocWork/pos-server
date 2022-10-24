@@ -4,17 +4,12 @@ const pool = require('../db');
 const _ = require('lodash');
 const helpers = require('../utils/helpers');
 const sob = require('../staticObj');
-
-async function checkSessionAndRole(req, res, next) {
+async function checkRoleKitchen(req, res, next) {
   try {
-    if (req.session.user && req.session.shiftId) {
-      if (req.session.user.role == sob.KITCHEN) {
-        next();
-      } else {
-        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
-      }
+    if (req.session.user.role == sob.KITCHEN) {
+      next();
     } else {
-      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
     }
   } catch (error) {
     console.log(error);
@@ -22,26 +17,21 @@ async function checkSessionAndRole(req, res, next) {
   }
 }
 
-router.use(checkSessionAndRole);
-
 async function massViewUpdate(id, req, res) {
   try {
-    if (req.io.sockets.adapter.rooms.get(`POS-L-0`).size > 0) {
+    req.io
+      .to('POS-L-0')
+      .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+
+    if (id && id != 0) {
       req.io
-        .to('POS-L-0')
-        .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+        .to(`POS-L-${id}`)
+        .emit(
+          'update-pos-tableOverview',
+          await helpers.updateTableOverview(id)
+        );
     }
 
-    if (req.io.sockets.adapter.rooms.get(`POS-L-${id}`).size > 0) {
-      if (id && id != 0) {
-        req.io
-          .to(`POS-L-${id}`)
-          .emit(
-            'update-pos-tableOverview',
-            await helpers.updateTableOverview(id)
-          );
-      }
-    }
     req.io
       .to(`KDS-L-0`)
       .emit('update-kds-kitchen', await helpers.updateKitchen());
@@ -222,6 +212,10 @@ router.delete('/remove/outofstock/', async (req, res) => {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
+});
+router.get('/demo', async (req, res) => {
+  massViewUpdate(0, req, res);
+  res.status(200).json();
 });
 
 //Notify item is ready;

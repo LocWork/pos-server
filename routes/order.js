@@ -6,16 +6,25 @@ const sob = require('../staticObj');
 const helpers = require('../utils/helpers');
 const _ = require('lodash');
 
-async function checkSessionAndRole(req, res, next) {
+async function checkRoleCashier(req, res, next) {
   try {
-    if (req.session.user && req.session.shiftId) {
-      if (req.session.user.role == sob.CASHIER) {
-        next();
-      } else {
-        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
-      }
+    if (req.session.user.role == sob.CASHIER) {
+      next();
     } else {
-      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function checkRoleWaiter(req, res, next) {
+  try {
+    if (req.session.user.role == sob.WAITER) {
+      next();
+    } else {
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
     }
   } catch (error) {
     console.log(error);
@@ -32,6 +41,25 @@ async function isAllItemServed(req, res, next) {
     );
     if (checkdetail.rows[0]) {
       res.status(400).json({ msg: 'Đơn vẫn còn món chưa sử lý!' });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function hasCheckBeenRefund(req, res, next) {
+  try {
+    const { checkid } = req.body;
+    const getBill = await pool.query(
+      `SELECT id FROM bill WHERE checkid = $1 and status = 'REFUND' LIMIT 1
+      `,
+      [checkid]
+    );
+    if (getBill.rows[0]) {
+      res.status(400).json({ msg: 'Hóa đơn này đã được hoàn tiền!' });
     } else {
       next();
     }
@@ -99,29 +127,20 @@ async function isCheckActive(req, res, next) {
 
 async function massViewUpdate(req, res) {
   try {
-    if (req.io.sockets.adapter.rooms.get(`POS-L-0`).size > 0) {
-      req.io
-        .to('POS-L-0')
-        .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-    }
-    if (req.session.locationid && req.session.locationid != 0) {
-      if (
-        req.io.sockets.adapter.rooms.get(`POS-L-${req.session.locationid}`)
-          .size > 0
-      ) {
-        req.io
-          .to(`POS-L-${req.session.locationid}`)
-          .emit(
-            'update-pos-tableOverview',
-            await helpers.updateTableOverview(req.session.locationid)
-          );
-      }
-    }
-    if (req.io.sockets.adapter.rooms.get(`KDS-L-0`).size > 0) {
-      req.io
-        .to(`KDS-L-0`)
-        .emit('update-kds-kitchen', await helpers.updateKitchen());
-    }
+    req.io
+      .to('POS-L-0')
+      .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+
+    req.io
+      .to(`POS-L-${req.session.locationid}`)
+      .emit(
+        'update-pos-tableOverview',
+        await helpers.updateTableOverview(req.session.locationid)
+      );
+
+    req.io
+      .to(`KDS-L-0`)
+      .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -130,24 +149,16 @@ async function massViewUpdate(req, res) {
 
 async function overViewUpdate(req, res) {
   try {
-    if (req.io.sockets.adapter.rooms.get(`POS-L-0`).size > 0) {
-      req.io
-        .to('POS-L-0')
-        .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-    }
-    if (req.session.locationid && req.session.locationid != 0) {
-      if (
-        req.io.sockets.adapter.rooms.get(`POS-L-${req.session.locationid}`)
-          .size > 0
-      ) {
-        req.io
-          .to(`POS-L-${req.session.locationid}`)
-          .emit(
-            'update-pos-tableOverview',
-            await helpers.updateTableOverview(req.session.locationid)
-          );
-      }
-    }
+    req.io
+      .to('POS-L-0')
+      .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+
+    req.io
+      .to(`POS-L-${req.session.locationid}`)
+      .emit(
+        'update-pos-tableOverview',
+        await helpers.updateTableOverview(req.session.locationid)
+      );
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -156,11 +167,9 @@ async function overViewUpdate(req, res) {
 
 async function kitchenUpdate(req, res) {
   try {
-    if (req.io.sockets.adapter.rooms.get(`KDS-L-0`).size > 0) {
-      req.io
-        .to(`KDS-L-0`)
-        .emit('update-kds-kitchen', await helpers.updateKitchen());
-    }
+    req.io
+      .to(`KDS-L-0`)
+      .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -169,23 +178,28 @@ async function kitchenUpdate(req, res) {
 
 async function isAllItemInStock(req, res, next) {
   try {
-    for (var i = 0; i < req.body.length; i++) {
-      var detail = req.body[i];
+    var name = '';
+    var flag = true;
+    for (var i = 0; i < req.body.itemlist.length; i++) {
+      var detail = req.body.itemlist[i];
       var itemCheck = await pool.query(
         `SELECT S.id , I.name 
         FROM itemOutOfStock AS S 
         JOIN item AS I
         ON I.id = S.itemid
         WHERE S.itemid = $1`,
-        [detail.itemId]
+        [detail.itemid]
       );
-      if (itemCheck.rows[0] != null) {
-        res
-          .status(400)
-          .json({ msg: `Món "${itemCheck.rows[0].name}" đã hết hàng.` });
+      if (itemCheck.rows[0]) {
+        name = itemCheck.rows[0].name;
+        flag = false;
       }
     }
-    next();
+    if (flag) {
+      next();
+    } else {
+      res.status(400).json({ msg: `Món ${name} đã hết hàng.` });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -215,7 +229,6 @@ async function updateRunningSince(req, res, next) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-// router.use(checkSessionAndRole);
 
 //Get order page component
 router.get('/taxvalue/', async (req, res) => {
@@ -268,6 +281,7 @@ router.get('/menu/', async (req, res) => {
   }
 });
 
+//Get check and check detail
 router.get('/check/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -290,7 +304,7 @@ router.get('/check/:id', async (req, res) => {
       for (var i = 0; i < check.rows.length; i++) {
         var checkDetailList = await pool.query(
           `
-       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, D.amount
+       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, D.amount, D.status
        FROM "check" AS C
  	     JOIN checkdetail AS D
        ON C.id = D.checkid
@@ -380,16 +394,12 @@ router.put(`/check/:id/info`, async (req, res) => {
   try {
     const { id } = req.params;
     const { guestname, cover } = req.body;
-    if (req.session.user) {
-      const updateInfomation = await pool.query(
-        `UPDATE "check" SET guestName = $1, cover = $2, updaterId = $3, updateTime = CURRENT_TIMESTAMP  WHERE id = $4`,
-        [guestname, cover, req.session.user.id, id]
-      );
-      await overViewUpdate(req, res);
-      res.status(200).json({ msg: 'Thông tin đã được cập nhật!' });
-    } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
-    }
+    const updateInfomation = await pool.query(
+      `UPDATE "check" SET guestName = $1, cover = $2, updaterId = $3, updateTime = CURRENT_TIMESTAMP  WHERE id = $4`,
+      [guestname, cover, req.session.user.id, id]
+    );
+    await overViewUpdate(req, res);
+    res.status(200).json({ msg: 'Thông tin đã được cập nhật!' });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -416,16 +426,35 @@ router.put(`/check/:id/note`, async (req, res) => {
   try {
     const { id } = req.params;
     const { note } = req.body;
-    if (req.session.user) {
-      const updateInfomation = await pool.query(
-        `UPDATE "check" SET note = $1, updaterId = $2, updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
-        [note, req.session.user.id, id]
-      );
-    } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
-    }
-
+    const updateInfomation = await pool.query(
+      `UPDATE "check" SET note = $1, updaterId = $2, updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
+      [note, req.session.user.id, id]
+    );
     res.status(200).json({ msg: 'Đã cập nhật thông tin' });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+router.get(`/view/item/:id`, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getItems = await pool.query(
+      `
+      SELECT I.id, I.name, I.image, M.price
+      FROM menuitem AS M
+      JOIN item AS I
+      ON M.itemid = I.id
+      WHERE I.id = $1 AND I.status != 'INACTIVE'
+      `,
+      [id]
+    );
+    if (getItems.rows[0]) {
+      res.status(200).json({ item: getItems.rows[0] });
+    } else {
+      res.status(400).json({ msg: 'Không tim thấy món' });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -436,36 +465,19 @@ router.put(`/check/:id/note`, async (req, res) => {
 router.get(`/view/specialrequest/:itemid`, async (req, res) => {
   try {
     const { itemid } = req.params;
-
-    const getItems = await pool.query(
+    const specialRequestList = await pool.query(
       `
-      SELECT I.id, I.name, I.image, M.price
-      FROM menuitem AS M
-      JOIN item AS I
-      ON M.itemid = I.id
-      WHERE I.id = $1
-      `,
-      [itemid]
-    );
-
-    if (getItems.rows[0]) {
-      const specialRequestList = await pool.query(
-        `
         SELECT S.id, S.name
         FROM item AS I
         JOIN specialrequest AS S
         ON I.majorgroupid = S.majorgroupid
         WHERE I.status = 'ACTIVE' AND S.status = 'ACTIVE' AND I.id = $1    
         `,
-        [itemid]
-      );
-      res.status(200).json({
-        item: getItems.rows[0],
-        specialrequest: specialRequestList.rows,
-      });
-    } else {
-      res.status(400).json({ msg: 'Không thể tìm thấy thông tin!' });
-    }
+      [itemid]
+    );
+    res.status(200).json({
+      specialrequest: specialRequestList.rows,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -488,21 +500,21 @@ router.post(
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING') RETURNING id`,
           [
             checkid,
-            detail.itemId,
-            detail.itemPrice,
+            detail.itemid,
+            detail.itemprice,
             detail.quantity,
             detail.subtotal,
-            detail.taxAmount,
+            detail.taxamount,
             detail.amount,
             detail.note,
           ]
         );
-        for (var x = 0; x < detail.specialRequestList.length; x++) {
+        for (var x = 0; x < detail.specialrequestlist.length; x++) {
           var detailSpecialRequest = await pool.query(
             `INSERT INTO checkitemspecialrequest(checkDetailId,specialRequestId) VALUES($1,$2)`,
             [
               checkDetailId.rows[0].id,
-              detail.specialRequestList[x].specialRequestId,
+              detail.specialrequestlist[x].specialrequestid,
             ]
           );
         }
@@ -654,7 +666,7 @@ router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
         );
       }
       await massViewUpdate(req, res);
-      res.status(200).json({ msg: 'Đã hủy check' });
+      res.status(200).json({ msg: 'Đã hủy đơn' });
     } else {
       res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
     }
@@ -672,14 +684,11 @@ router.put(`/checkdetail/:id/void`, async (req, res) => {
       `UPDATE "checkdetail" SET status = 'VOID' WHERE id = $1 RETURNING checkid`,
       [id]
     );
-    if (req.session.user) {
-      const updateCheck = await pool.query(
-        `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
-        [req.session.user.id, voidcheckdetail.rows[0].checkid]
-      );
-    } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
-    }
+
+    const updateCheck = await pool.query(
+      `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+      [req.session.user.id, voidcheckdetail.rows[0].checkid]
+    );
 
     await massViewUpdate(req, res);
     res.status(200).json();
@@ -851,7 +860,7 @@ router.get('/check/:id/refund', async (req, res) => {
   }
 });
 
-router.post('/check/refund', async (req, res) => {
+router.post('/check/refund', hasCheckBeenRefund, async (req, res) => {
   try {
     const { checkid } = req.body;
     const billno = await helpers.randomBillString(8);
