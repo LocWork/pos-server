@@ -183,6 +183,8 @@ async function updateRunningSince(req, res, next) {
   }
 }
 
+router.use(checkRoleWaiterAndCashier);
+
 //Get order page component
 router.get('/taxvalue/', async (req, res) => {
   try {
