@@ -68,7 +68,7 @@ const updateTableOverview = async (id) => {
   try {
     if (id != 0) {
       const tables = await pool.query(
-        `SELECT T.id, T.status, T.name AS tableName, C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
+        `SELECT T.id, T.status, T.name AS tableName,C.id as checkid ,C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
         FROM "location" AS L
         LEFT JOIN "table" AS T
         ON L.id = T.locationid
@@ -78,7 +78,7 @@ const updateTableOverview = async (id) => {
         ON C.id = D.checkid
         WHERE T.status != 'INACTIVE' AND L.status != 'INACTIVE' AND L.id = $1
         GROUP BY
-        T.id, C.totalamount, C.cover
+        T.id, C.totalamount, C.cover, C.id
         ORDER BY
         T.id
         ;`,
@@ -87,7 +87,7 @@ const updateTableOverview = async (id) => {
       return tables.rows;
     } else {
       const tables =
-        await pool.query(`SELECT T.id, T.status, T.name AS tableName, C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
+        await pool.query(`SELECT T.id, T.status, T.name AS tableName,C.id as checkid ,C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
         FROM "location" AS L
         LEFT JOIN "table" AS T
         ON L.id = T.locationid
@@ -97,7 +97,7 @@ const updateTableOverview = async (id) => {
         ON C.id = D.checkid
         WHERE T.status != 'INACTIVE' AND L.status != 'INACTIVE'
         GROUP BY
-        T.id, C.totalamount, C.cover
+        T.id, C.totalamount, C.cover, C.id
         ORDER BY
         T.id
         ;`);
@@ -111,9 +111,16 @@ const updateTableOverview = async (id) => {
 const updateKitchen = async () => {
   try {
     const checkList = await pool.query(`
-    SELECT id AS checkid, checkno, runningsince
-    FROM "check"
-    WHERE status = 'ACTIVE';
+    SELECT C.id AS checkid, C.checkno, C.runningsince::time, L.id AS locationid
+    FROM "check" AS C
+    JOIN (SELECT checkid FROM checkdetail WHERE status = 'WAITING') AS D
+    ON C.id = D.checkid
+    JOIN "table" AS T
+    ON T.id = C.tableid
+    JOIN "location" AS L
+    ON L.id = T.locationid
+    WHERE C.status = 'ACTIVE'
+    GROUP BY C.id , T.name, L.id;
     `);
     var checkInfo = [];
     for (var i = 0; i < checkList.rows.length; i++) {

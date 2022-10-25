@@ -41,13 +41,48 @@ async function massViewUpdate(id, req, res) {
   }
 }
 
+async function massViewUpdateList(list, req, res) {
+  try {
+    req.io
+      .to('POS-L-0')
+      .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id && list[i].id != 0) {
+        req.io
+          .to(`POS-L-${list[i].id}`)
+          .emit(
+            'update-pos-tableOverview',
+            await helpers.updateTableOverview(list[i].id)
+          );
+      }
+    }
+
+    req.io
+      .to(`KDS-L-0`)
+      .emit('update-kds-kitchen', await helpers.updateKitchen());
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+// router.use(checkRoleKitchen);
+
+//GET CHECK
 router.get('/', async (req, res) => {
   try {
     const checkList = await pool.query(`
-    SELECT id AS checkid, checkno, runningsince
-    FROM "check"
-    WHERE status = 'ACTIVE';
+    SELECT C.id AS checkid, C.checkno, C.runningsince::time, L.id AS locationid
+    FROM "check" AS C
+    JOIN (SELECT checkid FROM checkdetail WHERE status = 'WAITING') AS D
+    ON C.id = D.checkid
+    JOIN "table" AS T
+    ON T.id = C.tableid
+    JOIN "location" AS L
+    ON L.id = T.locationid
+    WHERE C.status = 'ACTIVE'
+    GROUP BY C.id , T.name, L.id;
     `);
+
     var checkInfo = [];
     for (var i = 0; i < checkList.rows.length; i++) {
       var checkDetailList = await pool.query(
@@ -110,6 +145,23 @@ router.get('/menu', async (req, res) => {
   }
 });
 
+router.get('/majorgroup', async (req, res) => {
+  try {
+    const getMajorGroupList = await pool.query(
+      `
+      SELECT id, name
+      FROM "majorgroup"
+      WHERE status = 'ACTIVE'
+      ORDER BY id
+      `
+    );
+    res.status(200).json(getMajorGroupList.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+});
+
 //Get menu item list in stock;
 router.get('/menu/:id/instock', async (req, res) => {
   try {
@@ -118,20 +170,24 @@ router.get('/menu/:id/instock', async (req, res) => {
     if (id && id != 0) {
       getMenuItems = await pool.query(
         `
-      SELECT M.id AS menuitemid,I.id, I.name,I.majorGroupId, I.image, M.price
-      FROM menuitem AS M
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      FROM menu AS M
+      JOIN menuitem AS MI
+      ON MI.menuid = M.id
       JOIN item AS I
-      ON M.itemid = I.id
-      WHERE I.status = 'ACTIVE' AND M.menuid = $1 AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
+      ON MI.itemid = I.id
+      WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
       `,
         [id]
       );
     } else {
       getMenuItems = await pool.query(`
-      SELECT M.id AS menuitemid,I.id, I.name, I.majorgroupid, I.image, M.price
-      FROM menuitem AS M
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      FROM menu AS M
+      JOIN menuitem AS MI
+      ON MI.menuid = M.id
       JOIN item AS I
-      ON M.itemid = I.id
+      ON MI.itemid = I.id
       WHERE I.status = 'ACTIVE' AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
       `);
     }
@@ -150,20 +206,24 @@ router.get('/menu/:id/outofstock', async (req, res) => {
     if (id && id != 0) {
       getMenuItems = await pool.query(
         `
-      SELECT M.id AS menuitemid,I.id, I.name,I.majorGroupId, I.image, M.price
-      FROM menuitem AS M
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      FROM menu AS M
+      JOIN menuitem AS MI
+      ON MI.menuid = M.id
       JOIN item AS I
-      ON M.itemid = I.id
-      WHERE I.status = 'ACTIVE' AND M.menuid = $1 AND I.id IN (SELECT itemid AS id FROM itemoutofstock)
+      ON MI.itemid = I.id
+      WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id IN (SELECT itemid AS id FROM itemoutofstock)
       `,
         [id]
       );
     } else {
       getMenuItems = await pool.query(`
-      SELECT M.id AS menuitemid,I.id, I.name, I.majorgroupid, I.image, M.price
-      FROM menuitem AS M
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      FROM menu AS M
+      JOIN menuitem AS MI
+      ON MI.menuid = M.id
       JOIN item AS I
-      ON M.itemid = I.id
+      ON MI.itemid = I.id
       WHERE I.status = 'ACTIVE' AND I.id IN (SELECT itemid AS id FROM itemoutofstock)
       `);
     }
@@ -218,35 +278,18 @@ router.get('/demo', async (req, res) => {
   res.status(200).json();
 });
 
-//Notify item is ready;
+//Notify item is done ready;
 router.put('/notify/ready/', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { detaillist } = req.body;
-    const location = await pool.query(
-      `
-    SELECT L.id
-    FROM "check" AS C
-    JOIN "table" AS T
-    ON T.id = C.tableid
-    JOIN "location" AS L
-    ON L.id = T.locationid
-    WHERE C.id = $1;
-    `,
-      [id]
-    );
+    const { locationlist, detaillist } = req.body;
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
         `UPDATE checkdetail SET status = 'READY', completiontime = (NOW() - (SELECT runningsince::time FROM "check" WHERE id = $1 LIMIT 1)) WHERE id = $2 AND status = 'WAITING'`,
-        [id, detaillist[i].id]
+        [detaillist[i].checkid, detaillist[i].detailid]
       );
     }
-    if (location.rows[0] != null) {
-      await massViewUpdate(location.rows[0].id, req, res);
-      res.status(200).json();
-    } else {
-      res.status(400).json({ msg: 'Không cập nhật được giao diện!' });
-    }
+    await massViewUpdateList(locationlist, req, res);
+    res.status(200).json();
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -254,34 +297,16 @@ router.put('/notify/ready/', async (req, res) => {
 });
 
 //notify item recall
-router.put('/check/:id/recall/', async (req, res) => {
+router.put('/notify/recall/', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { detaillist } = req.body;
-    const location = await pool.query(
-      `
-    SELECT L.id
-    FROM "check" AS C
-    JOIN "table" AS T
-    ON T.id = C.tableid
-    JOIN "location" AS L
-    ON L.id = T.locationid
-    WHERE C.id = $1;
-    `,
-      [id]
-    );
+    const { locationlist, detaillist } = req.body;
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
         `UPDATE checkdetail SET status = 'RECALL' WHERE id = $1 AND status = 'WAITING'`,
-        [detaillist[i].id]
+        [detaillist[i].detailid]
       );
     }
-    if (location.rows[0] != null) {
-      await massViewUpdate(location.rows[0].id, req, res);
-    } else {
-      res.status(400).json({ msg: 'Không cập nhật được giao diện!' });
-    }
-
+    await massViewUpdateList(locationlist, req, res);
     res.status(200).json();
   } catch (error) {
     console.log(error);
