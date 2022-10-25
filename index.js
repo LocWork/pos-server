@@ -12,6 +12,7 @@ const logoutRoute = require('./routes/logout');
 const reassignRoute = require('./routes/reassign');
 const tableOverview = require('./routes/tableOverview');
 const orderRoute = require('./routes/order');
+const orderProcessRoute = require('./routes/orderprocess.js');
 const playRoute = require('./routes/playground');
 const searchRoute = require('./routes/search');
 const kitchenRoute = require('./routes/kitchen');
@@ -97,6 +98,7 @@ async function checkUserSession(req, res, next) {
 app.use(checkUserSession);
 app.use('/tableoverview', tableOverview);
 app.use('/order', orderRoute);
+app.use('/orderprocess', orderProcessRoute);
 app.use('/reassign', reassignRoute);
 app.use('/kitchen', kitchenRoute);
 app.use('/playground', playRoute);

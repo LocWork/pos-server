@@ -3,19 +3,15 @@ const session = require('express-session');
 const router = Router();
 const pool = require('../db');
 
-async function checkSessionAndRole(req, res, next) {
+async function checkRoleWaiterAndCashier(req, res, next) {
   try {
-    if (req.session.user && req.session.shiftId) {
-      if (
-        req.session.user.role == sob.WAITER ||
-        req.session.user.role == sob.CASHIER
-      ) {
-        next();
-      } else {
-        res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
-      }
+    if (
+      req.session.user.role == sob.WAITER ||
+      req.session.user.role == sob.CASHIER
+    ) {
+      next();
     } else {
-      res.status(400).json({ msg: 'Xin hãy login lại vào hệ thống.' });
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
     }
   } catch (error) {
     console.log(error);
@@ -23,7 +19,7 @@ async function checkSessionAndRole(req, res, next) {
   }
 }
 
-// router.use(checkSessionAndRole);
+router.use(checkRoleWaiterAndCashier);
 
 async function isUserOnline(req, res, next) {
   try {

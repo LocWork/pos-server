@@ -65,7 +65,7 @@ async function massViewUpdateList(list, req, res) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-// router.use(checkRoleKitchen);
+router.use(checkRoleKitchen);
 
 //GET CHECK
 router.get('/', async (req, res) => {
