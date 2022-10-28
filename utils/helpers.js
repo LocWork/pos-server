@@ -187,7 +187,6 @@ const updateKitchen = async () => {
 
 const printBillDetailList = async (detailList) => {
   try {
-    console.log(detailList);
     var itemidList = [];
     var finaldetail = [];
     for (var i = 0; i < detailList.length; i++) {
