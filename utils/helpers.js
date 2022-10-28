@@ -12,7 +12,7 @@ const checkNoString = async () => {
   var result = [year, month, day].join('');
   try {
     const totalCheck = await pool.query(
-      `SELECT COUNT(id) FROM "check" WHERE creationTime::date = CURRENT_TIMESTAMP::date`
+      `SELECT COUNT(id) FROM "check" WHERE creationTime::date = CURRENT_DATE`
     );
     var total = parseInt(totalCheck.rows[0].count);
     if (total == 0) {
@@ -41,7 +41,7 @@ const billNoString = async () => {
   var result = [year, month, day].join('');
   try {
     const totalCheck = await pool.query(
-      `SELECT COUNT(id) FROM "bill" WHERE creationTime::date = CURRENT_TIMESTAMP::date`
+      `SELECT COUNT(id) FROM "bill" WHERE creationTime::date = CURRENT_DATE`
     );
     var total = parseInt(totalCheck.rows[0].count);
     if (total == 0) {

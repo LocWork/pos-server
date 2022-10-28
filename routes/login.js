@@ -68,7 +68,12 @@ router.post('/', async (req, res) => {
       if (userInformation.rows[0]) {
         const hashedPassword = await helpers.hashPassword(password);
         //Validate password information
-        if (await helpers.validatePassword(password, hashedPassword)) {
+        if (
+          await helpers.validatePassword(
+            password,
+            userInformation.rows[0].password
+          )
+        ) {
           //Determine the user role;
           const userRole = userInformation.rows[0].role;
           if (
@@ -88,6 +93,8 @@ router.post('/', async (req, res) => {
             );
             res.status(200).json();
           }
+        } else {
+          res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai!' });
         }
       } else {
         res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai!' });

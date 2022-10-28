@@ -126,4 +126,13 @@ router.put('/process/check/:id', async (req, res) => {
   }
 });
 
+router.get('/totalrevenue', async (req, res) => {
+  try {
+    SELECT;
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+});
+
 module.exports = router;
