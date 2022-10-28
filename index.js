@@ -9,7 +9,6 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 // route
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
-const reassignRoute = require('./routes/reassign');
 const tableOverview = require('./routes/tableOverview');
 const orderRoute = require('./routes/order');
 const orderProcessRoute = require('./routes/orderprocess.js');
@@ -17,7 +16,6 @@ const playRoute = require('./routes/playground');
 const searchRoute = require('./routes/search');
 const kitchenRoute = require('./routes/kitchen');
 //other
-// const cors = require('cors');
 
 //Basic express middelware
 // app.use(cors());
@@ -99,7 +97,6 @@ app.use(checkUserSession);
 app.use('/tableoverview', tableOverview);
 app.use('/order', orderRoute);
 app.use('/orderprocess', orderProcessRoute);
-app.use('/reassign', reassignRoute);
 app.use('/kitchen', kitchenRoute);
 app.use('/playground', playRoute);
 app.use('/search', searchRoute);

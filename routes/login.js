@@ -37,10 +37,10 @@ router.get('/session', async (req, res) => {
           [req.session.user.id]
         );
         req.session.destroy();
-        res.status(400).json();
+        res.status(401).json();
       }
     } else {
-      res.status(400).json();
+      res.status(401).json();
     }
   } catch (error) {
     console.log(error);

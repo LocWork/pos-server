@@ -130,7 +130,7 @@ router.get(`/check/:id/detail`, async (req, res) => {
       var specialRequestList = await pool.query(
         `
           SELECT S.name
-          FROM checkitemspecialrequest AS CSP
+          FROM checkdetailspecialrequest AS CSP
           JOIN checkdetail AS D
           ON CSP.checkdetailid = D.id
           JOIN specialrequest AS S

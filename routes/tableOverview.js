@@ -54,6 +54,28 @@ async function isCheckActive(req, res, next) {
   }
 }
 
+async function doesTableHaveCheck(req, res, next) {
+  try {
+    const { id } = req.params;
+    const tableCheck = await pool.query(
+      `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+      [id]
+    );
+    if (tableCheck.rows[0]) {
+      const updateTable = await pool.query(
+        `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
+        [id]
+      );
+      res.status(200).json({ checkid: tableCheck.rows[0].id });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
 async function canItemTransfer(req, res, next) {
   try {
     const { checkdetaillist } = req.body;
@@ -245,6 +267,42 @@ router.get('/location/:id', async (req, res) => {
         locationId: id,
         tables: tables.rows,
       });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+//OPEN table
+router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const shiftId = req.session.shiftId;
+    const accountId = req.session.user.id;
+    const checkno = await helpers.checkNoString();
+    const validate = await pool.query(
+      'SELECT id FROM "check" WHERE checkno = $1',
+      [checkno]
+    );
+    if (validate.rows[0]) {
+      res.status(400).json({
+        msg: 'Lỗi hệ thống: Xin liên hệ quản trị viên để giải quyết lỗi.',
+      });
+    } else {
+      const createCheck = await pool.query(
+        `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
+        [shiftId, accountId, id, checkno, 0, 0, 0, accountId]
+      );
+      if (createCheck.rows[0]) {
+        const updateTable = await pool.query(
+          `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
+          [id]
+        );
+        res.status(200).json({ checkid: createCheck.rows[0].id });
+      } else {
+        res.status(400).json({ msg: 'Không thể tạo đơn' });
+      }
     }
   } catch (error) {
     console.log(error);

@@ -3,31 +3,6 @@ const router = Router();
 const pool = require('./../db');
 const sob = require('./.././staticObj');
 
-async function isCheckExist(req, res, next) {
-  try {
-    if (req.session.user.role != sob.KITCHEN) {
-      const check = await pool.query(
-        `SELECT id
-        FROM "check"
-        WHERE status = 'ACTIVE' AND accountid = $1 LIMIT 1`,
-        [req.session.user.id]
-      );
-      if (check.rows[0]) {
-        res
-          .status(400)
-          .json({ msg: 'Xin hãy phân công lại trước khi logout!' });
-      } else {
-        next();
-      }
-    } else {
-      next();
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-}
-
 async function checkUserSession(req, res, next) {
   try {
     if (req.session.user) {
@@ -45,13 +20,12 @@ async function checkUserSession(req, res, next) {
   }
 }
 //checkUserSession
-router.post('/', checkUserSession, isCheckExist, async (req, res) => {
+router.post('/', checkUserSession, async (req, res) => {
   try {
     const userLogOut = await pool.query(
       `Update "account" SET status = 'OFFLINE' WHERE id=$1`,
       [req.session.user.id]
     );
-
     req.session.destroy();
     res.status(200).json();
   } catch (error) {

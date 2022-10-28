@@ -48,4 +48,82 @@ router.get('/uuid', (req, res) => {
   res.status(200).json({ msg: 'success' });
 });
 
+router.put('/process/check/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const checkdetail = await pool.query(
+      `SELECT D.id, I.name AS itemname, D.itemid,D.itemprice, D.quantity, D.subtotal, D.taxamount, D.amount
+      FROM "checkdetail" AS D
+      JOIN "item" AS I
+      ON D.itemid = I.id
+      WHERE D.status != 'VOID' AND D.status = 'SERVED' AND D.checkid = $1`,
+      [id]
+    );
+    var detailList = checkdetail.rows;
+    var itemidList = [];
+
+    for (var i = 0; i < detailList.length; i++) {
+      if (
+        !itemidList.some(
+          (x) =>
+            x.itemid === detailList[i].itemid &&
+            x.itemprice === detailList[i].itemprice
+        )
+      ) {
+        itemidList.push({
+          itemid: detailList[i].itemid,
+          itemname: detailList[i].itemname,
+          itemprice: detailList[i].itemprice,
+        });
+      }
+    }
+    var finaldetail = [];
+    var tempdetail = {
+      itemid: '',
+      itemname: '',
+      itemprice: 0,
+      quantity: 0,
+      subtotal: 0,
+      taxamount: 0,
+      amount: 0,
+    };
+    for (var x = 0; x < itemidList.length; x++) {
+      tempdetail = {
+        itemid: null,
+        itemname: null,
+        itemprice: 0,
+        quantity: 0,
+        subtotal: 0,
+        taxamount: 0,
+        amount: 0,
+      };
+
+      tempdetail.itemid = itemidList[x].itemid;
+      tempdetail.itemname = itemidList[x].itemname;
+      tempdetail.itemprice = itemidList[x].itemprice;
+      if (tempdetail.itemprice == null) {
+        tempdetail.itemprice = 0;
+      }
+      if (tempdetail.itemid != null && tempdetail.itemname != null) {
+        for (var j = 0; j < detailList.length; j++) {
+          if (tempdetail.itemid == detailList[j].itemid) {
+            tempdetail.quantity = tempdetail.quantity + detailList[j].quantity;
+            tempdetail.subtotal = tempdetail.subtotal + detailList[j].subtotal;
+            tempdetail.taxamount =
+              tempdetail.taxamount + detailList[j].taxamount;
+            tempdetail.amount = tempdetail.amount + detailList[j].amount;
+          }
+        }
+        finaldetail.push(tempdetail);
+      }
+    }
+    //console.log(finaldetail);
+    res.json(finaldetail);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+});
+
 module.exports = router;

@@ -22,27 +22,6 @@ async function checkRoleWaiterAndCashier(req, res, next) {
   }
 }
 
-async function doesTableHaveCheck(req, res, next) {
-  try {
-    const { id } = req.params;
-    const tableCheck = await pool.query(
-      `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
-      [id]
-    );
-    if (tableCheck.rows[0]) {
-      const updateTable = await pool.query(
-        `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
-        [id]
-      );
-      res.status(200).json({ checkid: tableCheck.rows[0].id });
-    } else {
-      next();
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-}
 async function isCheckActiveToVoid(req, res, next) {
   try {
     const { id } = req.params;
@@ -185,6 +164,23 @@ async function updateRunningSince(req, res, next) {
 
 router.use(checkRoleWaiterAndCashier);
 
+router.get('/voidreason/', async (req, res) => {
+  try {
+    const voidReasonList = await pool.query(
+      `
+      SELECT id, name
+      FROM voidReason
+      WHERE status = 'ACTIVE'
+      ORDER BY id ASC
+      `
+    );
+    res.status(200).json(voidReasonList.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
 //Get order page component
 router.get('/taxvalue/', async (req, res) => {
   try {
@@ -275,7 +271,7 @@ router.get('/check/:id', async (req, res) => {
           var specialRequestList = await pool.query(
             `
           SELECT S.name
-          FROM checkitemspecialrequest AS CSP
+          FROM checkdetailspecialrequest AS CSP
           JOIN checkdetail AS D
           ON CSP.checkdetailid = D.id
           JOIN specialrequest AS S
@@ -296,32 +292,6 @@ router.get('/check/:id', async (req, res) => {
       res.status(200).json({ check: checkInfo });
     } else {
       res.status(400).json({ msg: 'Không thể tìm được check!' });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-});
-
-//OPEN table
-router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const shiftId = req.session.shiftId;
-    const accountId = req.session.user.id;
-    const checkno = await helpers.randomCheckString(8);
-    const createCheck = await pool.query(
-      `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
-      [shiftId, accountId, id, checkno, 0, 0, 0, accountId]
-    );
-    if (createCheck.rows[0]) {
-      const updateTable = await pool.query(
-        `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
-        [id]
-      );
-      res.status(200).json({ checkid: createCheck.rows[0].id });
-    } else {
-      res.status(400).json({ msg: 'Không thể tạo đơn' });
     }
   } catch (error) {
     console.log(error);
@@ -466,7 +436,7 @@ router.post(
         );
         for (var x = 0; x < detail.specialrequestlist.length; x++) {
           var detailSpecialRequest = await pool.query(
-            `INSERT INTO checkitemspecialrequest(checkDetailId,specialRequestId) VALUES($1,$2)`,
+            `INSERT INTO checkdetailspecialrequest(checkDetailId,specialRequestId) VALUES($1,$2)`,
             [
               checkDetailId.rows[0].id,
               detail.specialrequestlist[x].specialrequestid,
@@ -477,10 +447,10 @@ router.post(
 
       const newCheckValue = await pool.query(
         `
-      SELECT SUM(D.subtotal) AS subtotal, SUM(D.taxamount) AS taxamount, SUM(D.amount) AS totalamount
+      SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
       FROM checkdetail AS D
       JOIN "check" AS C
-      ON D.checkid = C.id
+      ON D.checkid = C.id AND D.status != 'VOID'
       WHERE C.id = $1;
       `,
         [checkid]
@@ -598,33 +568,57 @@ router.put('/detail/:id/remind', async (req, res) => {
 router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
   try {
     const { id } = req.params;
-    if (req.session.user) {
-      const voidCheck = await pool.query(
-        `UPDATE "check" SET status = 'VOID', updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
-        [req.session.user.id, id]
-      );
+    const { voidid } = req.body;
+    const voidCheck = await pool.query(
+      `UPDATE "check" SET status = 'VOID', updaterId = $1, voidreasonid = $2,updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
+      [req.session.user.id, voidid, id]
+    );
 
-      const voidCheckDetail = await pool.query(
-        `UPDATE "checkdetail" SET status = 'VOID' WHERE checkid = $1`,
-        [id]
-      );
+    const voidCheckDetail = await pool.query(
+      `UPDATE "checkdetail" SET status = 'VOID', voidreasonid = $1 WHERE checkid = $2`,
+      [voidid, id]
+    );
 
-      const check = await pool.query(
-        `Select tableid from "check" where id = $1`,
-        [id]
-      );
+    const check = await pool.query(
+      `Select tableid from "check" where id = $1`,
+      [id]
+    );
 
-      if (check.rows[0]) {
-        const updateTable = await pool.query(
-          `UPDATE "table" SET status = 'NOT_USE' WHERE id = $1 AND status = 'IN_USE'`,
-          [check.rows[0].tableid]
-        );
-      }
-      await massViewUpdate(req, res);
-      res.status(200).json({ msg: 'Đã hủy đơn' });
-    } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin người dùng!' });
+    const newCheckValue = await pool.query(
+      `
+      SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
+      FROM checkdetail AS D
+      JOIN "check" AS C
+      ON D.checkid = C.id AND D.status != 'VOID'
+      WHERE C.id = $1;
+      `,
+      [id]
+    );
+    if (newCheckValue.rows) {
+      const updateCheckValue = await pool.query(
+        `
+      UPDATE "check"
+      SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP 
+      WHERE id = $5;
+      `,
+        [
+          newCheckValue.rows[0].subtotal,
+          newCheckValue.rows[0].taxamount,
+          newCheckValue.rows[0].totalamount,
+          req.session.user.id,
+          id,
+        ]
+      );
     }
+
+    if (check.rows[0]) {
+      const updateTable = await pool.query(
+        `UPDATE "table" SET status = 'NOT_USE' WHERE id = $1 AND status = 'IN_USE'`,
+        [check.rows[0].tableid]
+      );
+    }
+    await massViewUpdate(req, res);
+    res.status(200).json({ msg: 'Đã hủy đơn' });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -635,18 +629,55 @@ router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
 router.put(`/checkdetail/:id/void`, async (req, res) => {
   try {
     const { id } = req.params;
-    const voidcheckdetail = await pool.query(
-      `UPDATE "checkdetail" SET status = 'VOID' WHERE id = $1 RETURNING checkid`,
+    const { voidid } = req.body;
+    const check = await pool.query(
+      `SELECT checkid FROM "checkdetail" WHERE id = $1`,
       [id]
     );
+    if (check.rows[0]) {
+      const voidcheckdetail = await pool.query(
+        `UPDATE "checkdetail" SET status = 'VOID', voidreasonid = $1 WHERE id = $2 RETURNING checkid`,
+        [voidid, id]
+      );
 
-    const updateCheck = await pool.query(
-      `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
-      [req.session.user.id, voidcheckdetail.rows[0].checkid]
-    );
+      const newCheckValue = await pool.query(
+        `
+      SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
+      FROM checkdetail AS D
+      JOIN "check" AS C
+      ON D.checkid = C.id AND D.status != 'VOID'
+      WHERE C.id = $1;
+      `,
+        [check.rows[0].checkid]
+      );
+      if (newCheckValue.rows) {
+        const updateCheckValue = await pool.query(
+          `
+      UPDATE "check"
+      SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP 
+      WHERE id = $5;
+      `,
+          [
+            newCheckValue.rows[0].subtotal,
+            newCheckValue.rows[0].taxamount,
+            newCheckValue.rows[0].totalamount,
+            req.session.user.id,
+            check.rows[0].checkid,
+          ]
+        );
+      }
 
-    await massViewUpdate(req, res);
-    res.status(200).json();
+      const updateCheck = await pool.query(
+        `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+        [req.session.user.id, check.rows[0].checkid]
+      );
+      await massViewUpdate(req, res);
+      res.status(200).json();
+    } else {
+      res
+        .status(400)
+        .json({ msg: 'Lỗi hệ thống: Không tìm được thông tin cần cập nhật!' });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -669,6 +700,7 @@ router.get('/paymentmethod', async (req, res) => {
 router.put('/detail/:id/served', async (req, res) => {
   try {
     const { id } = req.params;
+
     const updateCheckDetail = await pool.query(
       `UPDATE checkdetail SET status = 'SERVED' WHERE id = $1`,
       [id]
