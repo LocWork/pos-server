@@ -32,28 +32,6 @@ async function checkRoleWaiter(req, res, next) {
   }
 }
 
-async function isCheckActive(req, res, next) {
-  try {
-    const { id } = req.params;
-    const checkstatus = await pool.query(
-      `SELECT status from "check" WHERE id = $1`,
-      [id]
-    );
-    if (checkstatus.rows[0]) {
-      if (checkstatus.rows[0].status == sob.ACTIVE) {
-        next();
-      } else {
-        res.status(400).json({ msg: `Không thể thay đổi thông tin` });
-      }
-    } else {
-      res.status(400).json({ msg: `Không thể thay đổi thông tin` });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-}
-
 async function doesTableHaveCheck(req, res, next) {
   try {
     const { id } = req.params;
@@ -67,30 +45,6 @@ async function doesTableHaveCheck(req, res, next) {
         [id]
       );
       res.status(200).json({ checkid: tableCheck.rows[0].id });
-    } else {
-      next();
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-}
-
-async function canItemTransfer(req, res, next) {
-  try {
-    const { checkdetaillist } = req.body;
-    var flag = true;
-    for (var i = 0; i < checkdetaillist.length; i++) {
-      var item = await pool.query(
-        `SELECT id FROM checkdetail WHERE id = $1 AND (status != 'VOID' AND status != 'RECALL')`,
-        [checkdetaillist[i].id]
-      );
-      if (!item.rows[0]) {
-        flag = false;
-      }
-    }
-    if (flag == false) {
-      res.status(400).json('Không thể chuyển món do thông tin đã thay đổi');
     } else {
       next();
     }
@@ -187,7 +141,7 @@ async function createCheck(req, res, next) {
     const { id2 } = req.params;
     const shiftId = req.session.shiftId;
     const accountId = req.session.user.id;
-    const checkno = await helpers.randomCheckString(8);
+    const checkno = await helpers.checkNoString(8);
     const createCheck = await pool.query(
       `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
       [shiftId, accountId, id2, checkno, 0, 0, 0, accountId]
@@ -356,43 +310,6 @@ router.get(
   }
 );
 
-//transfer check detail
-router.put(
-  '/transfer/checkdetail/check/:id',
-  isCheckActive,
-  canItemTransfer,
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { checkdetaillist } = req.body;
-      for (var i = 0; i < checkdetaillist.length; i++) {
-        var transferCheckDetail = await pool.query(
-          `UPDATE checkdetail SET checkid = $1 WHERE id = $2 RETURNING checkid`,
-          [id, checkdetaillist[i].id]
-        );
-      }
-
-      if (transferCheckDetail.rows[0]) {
-        const updateCheckTo = await pool.query(
-          `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
-          [req.session.user.id, id]
-        );
-        const updateCheckFrom = await pool.query(
-          `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
-          [req.session.user.id, transferCheckDetail.rows[0].checkid]
-        );
-        await massViewUpdate(req, res);
-        res.status(200).json({ msg: 'Món đã được chuyển đi' });
-      } else {
-        res.status(400).json({ msg: 'Không tìm thấy thông tin hóa đơn!' });
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
-    }
-  }
-);
-
 //Transfer table
 router.put(
   '/transfer/table1/:id1/table2/:id2',
@@ -410,18 +327,58 @@ router.put(
         `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
         [id2]
       );
-      console.log(firstTableCheck.rows[0]);
-      console.log(secondTableCheck.rows[0]);
+
       if (firstTableCheck.rows[0] && secondTableCheck.rows[0]) {
         const transferTable = await pool.query(
           `UPDATE checkdetail SET checkid = $1 WHERE checkid = $2`,
           [secondTableCheck.rows[0].id, firstTableCheck.rows[0].id]
         );
-        const deleteCheck = await pool.query(
-          `DELETE FROM "check" WHERE id = $1`,
+        const updateCheckToVoid = await pool.query(
+          `UPDATE "check" SET status = 'VOID' WHERE id = $1`,
           [firstTableCheck.rows[0].id]
         );
-        console.log('hello');
+
+        const newCheckValue = await pool.query(
+          `
+      SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
+      FROM checkdetail AS D
+      JOIN "check" AS C
+      ON D.checkid = C.id AND D.status != 'VOID'
+      WHERE C.id = $1;
+      `,
+          [secondTableCheck.rows[0].id]
+        );
+        if (newCheckValue.rows) {
+          const updateCheckValueTable2 = await pool.query(
+            `
+            UPDATE "check"
+            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP , runningsince = CURRENT_TIMESTAMP
+            WHERE id = $5;
+            `,
+            [
+              newCheckValue.rows[0].subtotal,
+              newCheckValue.rows[0].taxamount,
+              newCheckValue.rows[0].totalamount,
+              req.session.user.id,
+              secondTableCheck.rows[0].id,
+            ]
+          );
+
+          const updateCheckValueTable1 = await pool.query(
+            `
+            UPDATE "check"
+            SET subtotal = 0, totaltax = 0,totalamount = 0,updaterid = 0,updatetime = CURRENT_TIMESTAMP 
+            WHERE id = $1;
+            `,
+            [firstTableCheck.rows[0].id]
+          );
+        }
+
+        const updateCheck = await pool.query(
+          `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+          [req.session.user.id, secondTableCheck.rows[0].id]
+        );
+
         const updateTable = await pool.query(
           `UPDATE "table" SET status ='NOT_USE' WHERE id = $1`,
           [id1]

@@ -713,4 +713,200 @@ router.put('/detail/:id/served', async (req, res) => {
   }
 });
 
+async function isCheckActiveForTransfer(req, res, next) {
+  try {
+    const { id } = req.params;
+    const checkstatus = await pool.query(
+      `SELECT status from "check" WHERE id = $1`,
+      [id]
+    );
+    if (checkstatus.rows[0]) {
+      if (checkstatus.rows[0].status == sob.ACTIVE) {
+        next();
+      } else {
+        res.status(400).json({ msg: `Không thể thay đổi thông tin` });
+      }
+    } else {
+      res.status(400).json({ msg: `Không thể thay đổi thông tin` });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function canItemTransfer(req, res, next) {
+  try {
+    const { detailid } = req.body;
+    var item = await pool.query(
+      `SELECT id FROM checkdetail WHERE id = $1 AND (status != 'VOID' AND status != 'RECALL')`,
+      [detailid]
+    );
+    if (!item.rows[0]) {
+      res.status(400).json('Không thể chuyển món');
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function createCheck(req, res, next) {
+  try {
+    const { tableid } = req.body;
+    const shiftId = req.session.shiftId;
+    const accountId = req.session.user.id;
+    const checkno = await helpers.checkNoString(8);
+    const createCheck = await pool.query(
+      `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
+      [shiftId, accountId, tableid, checkno, 0, 0, 0, accountId]
+    );
+    if (createCheck.rows[0]) {
+      const updateTable = await pool.query(
+        `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
+        [tableid]
+      );
+      next();
+    } else {
+      res.status(400).json({ msg: 'Không thể tạo đơn' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function isSecondTableInUse(req, res, next) {
+  try {
+    const { tableid } = req.body;
+    const tableStatus = await pool.query(
+      `SELECT status FROM "table" WHERE id = $1`,
+      [tableid]
+    );
+    if (tableStatus.rows[0]) {
+      if (tableStatus.rows[0].status == sob.IN_USE) {
+        const tableCheck = await pool.query(
+          `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+          [tableid]
+        );
+        if (tableCheck.rows[0]) {
+          next();
+        } else {
+          await createCheck(req, res, next);
+        }
+      } else {
+        await createCheck(req, res, next);
+      }
+    } else {
+      res.status(400).json({ msg: 'Không tìm được bàn!' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+//transfer check detail
+router.put(
+  '/transfer/checkdetail/check/:id',
+  isCheckActiveForTransfer,
+  canItemTransfer,
+  isSecondTableInUse,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { detailid, tableid } = req.body;
+
+      const check2 = await pool.query(
+        `SELECT C.id 
+        FROM "check" AS C
+        JOIN "table" AS T
+        ON T.id = C.tableid
+        WHERE T.status = 'IN_USE' AND C.status = 'ACTIVE' AND T.id = $1
+        LIMIT 1
+        `,
+        [tableid]
+      );
+
+      const id2 = check2.rows[0].id;
+      var transferCheckDetail = await pool.query(
+        `UPDATE checkdetail SET checkid = $1 WHERE id = $2`,
+        [id2, detailid]
+      );
+
+      const newCheckValue1 = await pool.query(
+        `
+      SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
+      FROM checkdetail AS D
+      JOIN "check" AS C
+      ON D.checkid = C.id AND D.status != 'VOID'
+      WHERE C.id = $1;
+      `,
+        [id]
+      );
+      if (newCheckValue1.rows) {
+        const updateCheckValueTable2 = await pool.query(
+          `
+            UPDATE "check"
+            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP , runningsince = CURRENT_TIMESTAMP
+            WHERE id = $5;
+            `,
+          [
+            newCheckValue1.rows[0].subtotal,
+            newCheckValue1.rows[0].taxamount,
+            newCheckValue1.rows[0].totalamount,
+            req.session.user.id,
+            id,
+          ]
+        );
+
+        const newCheckValue2 = await pool.query(
+          `
+      SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
+      FROM checkdetail AS D
+      JOIN "check" AS C
+      ON D.checkid = C.id AND D.status != 'VOID'
+      WHERE C.id = $1;
+      `,
+          [id2]
+        );
+        if (newCheckValue2.rows) {
+          const updateCheckValueTable2 = await pool.query(
+            `
+            UPDATE "check"
+            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP , runningsince = CURRENT_TIMESTAMP
+            WHERE id = $5;
+            `,
+            [
+              newCheckValue2.rows[0].subtotal,
+              newCheckValue2.rows[0].taxamount,
+              newCheckValue2.rows[0].totalamount,
+              req.session.user.id,
+              id2,
+            ]
+          );
+        }
+      }
+
+      const updateCheckTo = await pool.query(
+        `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+        [req.session.user.id, id2]
+      );
+
+      const updateCheckFrom = await pool.query(
+        `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+        [req.session.user.id, id]
+      );
+
+      await massViewUpdate(req, res);
+      res.status(200).json({ msg: 'Món đã được chuyển đi' });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    }
+  }
+);
+
 module.exports = router;
