@@ -105,15 +105,11 @@ router.get(`/bill/:id`, async (req, res) => {
 router.get(`/check/:id/detail`, async (req, res) => {
   try {
     const { id } = req.params;
-    const check = await pool.query(
-      `SELECT id, checkno, creationtime::TIMESTAMP::Time,subtotal,totaltax,totalamount FROM "check" WHERE id = $1`,
-      [id]
-    );
 
     var checkInfo = [];
     var checkDetailList = await pool.query(
       `
-       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.subtotal,D.taxamount, D.amount, D.status, D.completiontime
+       SELECT D.id, I.name AS itemname, D.quantity, D.note, D.subtotal,D.taxamount, D.amount, D.status, D.completiontime
        FROM "check" AS C
  	     JOIN checkdetail AS D
        ON C.id = D.checkid
@@ -137,7 +133,7 @@ router.get(`/check/:id/detail`, async (req, res) => {
           ON CSP.specialrequestid = S.id
           WHERE D.id = $1
           `,
-        [checkDetailList.rows[x].checkdetailid]
+        [checkDetailList.rows[x].id]
       );
 
       temp.push(
@@ -148,9 +144,7 @@ router.get(`/check/:id/detail`, async (req, res) => {
     }
 
     //checkInfo = _.merge(check.rows[0], { checkdetail: temp });
-    res
-      .status(200)
-      .json({ check: check.rows[0], checkdetail: checkDetailList.rows });
+    res.status(200).json({ checkdetail: checkDetailList.rows });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -160,19 +154,13 @@ router.get(`/check/:id/detail`, async (req, res) => {
 router.get('/bill/:id/detail', async (req, res) => {
   try {
     const { id } = req.params;
-    const bill = await pool.query(
-      `SELECT id, billno, creationtime::TIMESTAMP::Time,subtotal,totaltax,totalamount FROM "bill" WHERE id = $1`,
-      [id]
-    );
 
     const billDetailList = await pool.query(
       `SELECT id, itemname,itemprice,quantity,subtotal,taxamount,amount FROM "billdetail" WHERE billid = $1`,
       [id]
     );
 
-    res
-      .status(200)
-      .json({ bill: bill.rows[0], billdetail: billDetailList.rows });
+    res.status(200).json({ billdetail: billDetailList.rows });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -182,19 +170,13 @@ router.get('/bill/:id/detail', async (req, res) => {
 router.get('/bill/:id/payment', async (req, res) => {
   try {
     const { id } = req.params;
-    const bill = await pool.query(
-      `SELECT id, billno, creationtime::TIMESTAMP::Time,subtotal,totaltax,totalamount FROM "bill" WHERE id = $1`,
-      [id]
-    );
 
     const billPaymentList = await pool.query(
       `SELECT paymentmethodname,amountreceive FROM "billpayment" WHERE billid = $1`,
       [id]
     );
 
-    res
-      .status(200)
-      .json({ bill: bill.rows[0], paymentdetail: billPaymentList.rows });
+    res.status(200).json({ paymentdetail: billPaymentList.rows });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
