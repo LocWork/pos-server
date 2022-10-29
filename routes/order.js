@@ -421,8 +421,8 @@ router.post(
       for (var i = 0; i < itemlist.length; i++) {
         var detail = itemlist[i];
         var checkDetailId = await pool.query(
-          `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,note,isreminded,status) 
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING') RETURNING id`,
+          `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,note,isreminded,status,starttime) 
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING',CURRENT_TIMESTAMP::time) RETURNING id`,
           [
             checkid,
             detail.itemid,

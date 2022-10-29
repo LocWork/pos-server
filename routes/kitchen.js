@@ -284,8 +284,8 @@ router.put('/notify/ready/', async (req, res) => {
     const { locationlist, detaillist } = req.body;
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
-        `UPDATE checkdetail SET status = 'READY', completiontime = (NOW() - (SELECT runningsince::time FROM "check" WHERE id = $1 LIMIT 1)) WHERE id = $2 AND status = 'WAITING'`,
-        [detaillist[i].checkid, detaillist[i].detailid]
+        `UPDATE checkdetail SET status = 'READY', completiontime = (NOW() - (SELECT starttime::time FROM checkdetail WHERE id = $1 LIMIT 1)) WHERE id = $2 AND status = 'WAITING'`,
+        [detaillist[i].detailid, detaillist[i].detailid]
       );
     }
     await massViewUpdateList(locationlist, req, res);
