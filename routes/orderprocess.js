@@ -78,7 +78,7 @@ async function hasCheckBeenRefund(req, res, next) {
   }
 }
 
-router.use(checkRoleCashier);
+//router.use(checkRoleCashier);
 
 router.post('/check/process', isAllItemServed, async (req, res) => {
   try {

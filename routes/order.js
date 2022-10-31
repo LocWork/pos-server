@@ -162,7 +162,7 @@ async function updateRunningSince(req, res, next) {
   }
 }
 
-router.use(checkRoleWaiterAndCashier);
+//router.use(checkRoleWaiterAndCashier);
 
 router.get('/voidreason/', async (req, res) => {
   try {
