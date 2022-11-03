@@ -130,16 +130,16 @@ const updateTableOverview = async (id) => {
 const updateKitchen = async () => {
   try {
     const checkList = await pool.query(`
-    SELECT C.id AS checkid, C.checkno, C.runningsince::time, L.id AS locationid
+    SELECT C.id AS checkid, C.checkno, L.id AS locationid, D.runningsince
     FROM "check" AS C
-    JOIN (SELECT checkid FROM checkdetail WHERE status = 'WAITING') AS D
+    JOIN (SELECT checkid,(NOW() - MIN(starttime))::time AS runningsince FROM checkdetail WHERE status = 'WAITING' GROUP BY checkid) AS D
     ON C.id = D.checkid
     JOIN "table" AS T
     ON T.id = C.tableid
     JOIN "location" AS L
     ON L.id = T.locationid
     WHERE C.status = 'ACTIVE'
-    GROUP BY C.id , T.name, L.id;
+    GROUP BY C.id , T.name, L.id, D.runningsince;
     `);
     var checkInfo = [];
     for (var i = 0; i < checkList.rows.length; i++) {
@@ -151,7 +151,7 @@ const updateKitchen = async () => {
        ON C.id = D.checkid
        JOIN item AS I
        ON D.itemid = I.id
-       WHERE D.status != 'VOID' AND C.id = $1
+       WHERE D.status != 'VOID' AND D.status = 'WAITING' AND C.id = $1
        ORDER BY D.id ASC;
        `,
         [checkList.rows[i].checkid]
@@ -179,7 +179,8 @@ const updateKitchen = async () => {
       }
       checkInfo.push(_.merge(checkList.rows[i], { checkdetail: temp }));
     }
-    return checkInfo;
+    console.log({ checkInfo });
+    return { checkInfo };
   } catch (error) {
     console.log(error);
   }

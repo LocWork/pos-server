@@ -73,7 +73,7 @@ router.get('/', async (req, res) => {
     const checkList = await pool.query(`
     SELECT C.id AS checkid, C.checkno, L.id AS locationid, D.runningsince
     FROM "check" AS C
-    JOIN (SELECT checkid, MIN(starttime) AS runningsince FROM checkdetail WHERE status = 'WAITING' GROUP BY checkid) AS D
+    JOIN (SELECT checkid,MIN(starttime)::time AS runningsince FROM checkdetail WHERE status = 'WAITING' GROUP BY checkid) AS D
     ON C.id = D.checkid
     JOIN "table" AS T
     ON T.id = C.tableid
@@ -93,7 +93,7 @@ router.get('/', async (req, res) => {
        ON C.id = D.checkid
        JOIN item AS I
        ON D.itemid = I.id
-       WHERE D.status != 'VOID' AND C.id = $1
+       WHERE D.status != 'VOID' AND D.status = 'WAITING' AND C.id = $1
        ORDER BY D.id ASC;
        `,
         [checkList.rows[i].checkid]
