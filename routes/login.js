@@ -118,9 +118,9 @@ async function validateCashier(req, res, next) {
     if (req.session.user.role == sob.CASHIER) {
       const otherCashier = await pool.query(
         `SELECT A.id
-        FROM "acount" AS A
+        FROM "account" AS A
         JOIN "role" AS R
-        ON A.rolid = R.id
+        ON A.roleid = R.id
         WHERE A.status = 'ONLINE' AND R.name = 'CASHIER' AND A.id != $1 LIMIT 1`,
         [req.session.user.id]
       );
@@ -194,11 +194,23 @@ router.get(`/shift`, async (req, res) => {
 
 router.put(`/cashieropen`, async (req, res) => {
   try {
-    const { shiftId, amount } = req.body;
-
+    const { shiftid, amount } = req.body;
     const updateShift = await pool.query(
-      `UPDATE "shift" SET isOpen = true, openerid = $1,`
+      `UPDATE "shift" SET isOpen = true, openerid = $1 WHERE id = $2 AND status = 'ACTIVE' returning id`,
+      [req.session.user.id, shiftid]
     );
+
+    if (updateShift.rows[0]) {
+      const open = await pool.query(
+        `
+      INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount) VALUES($1,$2,NOW()::timestamp,'OPEN',$3)
+      `,
+        [req.session.user.id, updateShift.rows[0].id, amount]
+      );
+      res.status(200).json();
+    } else {
+      res.status(400).json({ msg: 'Không thể mở ca' });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
