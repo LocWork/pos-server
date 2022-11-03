@@ -126,9 +126,21 @@ router.put('/process/check/:id', async (req, res) => {
   }
 });
 
-router.get('/totalrevenue', async (req, res) => {
+router.get('/avg/completiontime/', async (req, res) => {
   try {
-    SELECT;
+    //GET total average of each check;
+    const checkAVG =
+      await pool.query(`SELECT C.id, coalesce(AVG(D.completiontime),'00:00:00') AS check_avg
+      FROM "check" AS C
+      LEFT JOIN checkdetail AS D
+      ON C.id = D.checkid
+      WHERE C.status = 'CLOSED' AND D.status = 'SERVED' AND creationtime::date = CURRENT_DATE
+      GROUP BY
+      C.id,
+      D.checkid
+      ORDER BY
+      C.id DESC;`);
+    res.status(200).json(totalcheck);
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống' });

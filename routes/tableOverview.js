@@ -384,9 +384,9 @@ router.put(
           [id1]
         );
         await massViewUpdate(req, res);
-        res.status(200).json();
+        res.status(200).json('Chuyển bàn thành công!');
       } else {
-        res.status(400).json('Không thể chuyển bàn');
+        res.status(400).json('Không thể chuyển bàn!');
       }
     } catch (error) {
       console.log(error);
