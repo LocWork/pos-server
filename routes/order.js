@@ -138,30 +138,6 @@ async function isAllItemInStock(req, res, next) {
   }
 }
 
-async function updateRunningSince(req, res, next) {
-  try {
-    const { checkid } = req.params;
-    const waitingItem = await pool.query(
-      `
-      SELECT id FROM checkdetail WHERE checkid = $1 AND checkdetail.status = 'WAITING' LIMIT 1 
-      `,
-      [checkid]
-    );
-    if (waitingItem.rows[0] == null) {
-      const updateCheckTime = await pool.query(
-        `
-        UPDATE "check" SET runningSince = CURRENT_TIMESTAMP WHERE id = $1
-        `,
-        [checkid]
-      );
-    }
-    next();
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-}
-
 //router.use(checkRoleWaiterAndCashier);
 
 router.get('/voidreason/', async (req, res) => {
@@ -410,76 +386,70 @@ router.get(`/view/specialrequest/:itemid`, async (req, res) => {
 });
 
 //SEND ORDER
-router.post(
-  '/check/add',
-  isCheckActive,
-  isAllItemInStock,
-  updateRunningSince,
-  async (req, res) => {
-    try {
-      const { checkid, itemlist } = req.body;
-      for (var i = 0; i < itemlist.length; i++) {
-        var detail = itemlist[i];
-        var checkDetailId = await pool.query(
-          `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,note,isreminded,status,starttime) 
+router.post('/check/add', isCheckActive, isAllItemInStock, async (req, res) => {
+  try {
+    const { checkid, itemlist } = req.body;
+    for (var i = 0; i < itemlist.length; i++) {
+      var detail = itemlist[i];
+      var checkDetailId = await pool.query(
+        `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,note,isreminded,status,starttime) 
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING',CURRENT_TIMESTAMP::time) RETURNING id`,
+        [
+          checkid,
+          detail.itemid,
+          detail.itemprice,
+          detail.quantity,
+          detail.subtotal,
+          detail.taxamount,
+          detail.amount,
+          detail.note,
+        ]
+      );
+      for (var x = 0; x < detail.specialrequestlist.length; x++) {
+        var detailSpecialRequest = await pool.query(
+          `INSERT INTO checkdetailspecialrequest(checkDetailId,specialRequestId) VALUES($1,$2)`,
           [
-            checkid,
-            detail.itemid,
-            detail.itemprice,
-            detail.quantity,
-            detail.subtotal,
-            detail.taxamount,
-            detail.amount,
-            detail.note,
+            checkDetailId.rows[0].id,
+            detail.specialrequestlist[x].specialrequestid,
           ]
         );
-        for (var x = 0; x < detail.specialrequestlist.length; x++) {
-          var detailSpecialRequest = await pool.query(
-            `INSERT INTO checkdetailspecialrequest(checkDetailId,specialRequestId) VALUES($1,$2)`,
-            [
-              checkDetailId.rows[0].id,
-              detail.specialrequestlist[x].specialrequestid,
-            ]
-          );
-        }
       }
+    }
 
-      const newCheckValue = await pool.query(
-        `
+    const newCheckValue = await pool.query(
+      `
       SELECT coalesce(SUM(D.subtotal),0) AS subtotal , coalesce(SUM(D.taxamount),0) AS taxamount, coalesce(SUM(D.amount),0) AS totalamount
       FROM checkdetail AS D
       JOIN "check" AS C
       ON D.checkid = C.id AND D.status != 'VOID'
       WHERE C.id = $1;
       `,
-        [checkid]
-      );
-      if (newCheckValue.rows) {
-        const updateCheckValue = await pool.query(
-          `
+      [checkid]
+    );
+    if (newCheckValue.rows) {
+      const updateCheckValue = await pool.query(
+        `
       UPDATE "check"
       SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP 
       WHERE id = $5;
       `,
-          [
-            newCheckValue.rows[0].subtotal,
-            newCheckValue.rows[0].taxamount,
-            newCheckValue.rows[0].totalamount,
-            req.session.user.id,
-            checkid,
-          ]
-        );
-      }
-
-      await massViewUpdate(req, res);
-      res.status(200).json();
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+        [
+          newCheckValue.rows[0].subtotal,
+          newCheckValue.rows[0].taxamount,
+          newCheckValue.rows[0].totalamount,
+          req.session.user.id,
+          checkid,
+        ]
+      );
     }
+
+    await massViewUpdate(req, res);
+    res.status(200).json();
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
-);
+});
 
 //GET menu item list
 router.get('/menu/:id', async (req, res) => {
@@ -760,7 +730,7 @@ async function createCheck(req, res, next) {
     const accountId = req.session.user.id;
     const checkno = await helpers.checkNoString(8);
     const createCheck = await pool.query(
-      `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
+      `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
       [shiftId, accountId, tableid, checkno, 0, 0, 0, accountId]
     );
     if (createCheck.rows[0]) {
@@ -850,7 +820,7 @@ router.put(
         const updateCheckValueTable2 = await pool.query(
           `
             UPDATE "check"
-            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP , runningsince = CURRENT_TIMESTAMP
+            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP
             WHERE id = $5;
             `,
           [
@@ -876,7 +846,7 @@ router.put(
           const updateCheckValueTable2 = await pool.query(
             `
             UPDATE "check"
-            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP , runningsince = CURRENT_TIMESTAMP
+            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP
             WHERE id = $5;
             `,
             [

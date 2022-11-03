@@ -143,7 +143,7 @@ async function createCheck(req, res, next) {
     const accountId = req.session.user.id;
     const checkno = await helpers.checkNoString(8);
     const createCheck = await pool.query(
-      `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
+      `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
       [shiftId, accountId, id2, checkno, 0, 0, 0, accountId]
     );
     if (createCheck.rows[0]) {
@@ -245,7 +245,7 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
       });
     } else {
       const createCheck = await pool.query(
-        `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,runningsince,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
+        `INSERT INTO "check"(shiftid,accountId,tableid,checkno,subtotal,totaltax,totalamount,creatorid,creationtime,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,'ACTIVE') RETURNING id;`,
         [shiftId, accountId, id, checkno, 0, 0, 0, accountId]
       );
       if (createCheck.rows[0]) {
@@ -352,7 +352,7 @@ router.put(
           const updateCheckValueTable2 = await pool.query(
             `
             UPDATE "check"
-            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP , runningsince = CURRENT_TIMESTAMP
+            SET subtotal = $1, totaltax = $2,totalamount = $3,updaterid = $4,updatetime = CURRENT_TIMESTAMP
             WHERE id = $5;
             `,
             [

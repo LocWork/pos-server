@@ -203,11 +203,16 @@ router.put(`/cashieropen`, async (req, res) => {
     if (updateShift.rows[0]) {
       const open = await pool.query(
         `
-      INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount) VALUES($1,$2,NOW()::timestamp,'OPEN',$3)
+      INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount) VALUES($1,$2,NOW()::timestamp,'OPEN',$3) RETURNING id
       `,
         [req.session.user.id, updateShift.rows[0].id, amount]
       );
-      res.status(200).json();
+      if (open.rows[0]) {
+        req.session.shiftId = updateShift.rows[0].id;
+        res.status(200).json();
+      } else {
+        res.status(400).json({ msg: 'Không thể lưu thông tin mở ca' });
+      }
     } else {
       res.status(400).json({ msg: 'Không thể mở ca' });
     }
