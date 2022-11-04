@@ -9,12 +9,13 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 // route
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
-const tableOverview = require('./routes/tableOverview');
+const tableOverview = require('./routes/tableoverview');
 const orderRoute = require('./routes/order');
 const orderProcessRoute = require('./routes/orderprocess.js');
 const playRoute = require('./routes/playground');
 const searchRoute = require('./routes/search');
 const kitchenRoute = require('./routes/kitchen');
+const transferDetailRoute = require('./routes/transferdetail');
 //other
 
 //Basic express middelware
@@ -100,6 +101,7 @@ app.use('/orderprocess', orderProcessRoute);
 app.use('/kitchen', kitchenRoute);
 app.use('/playground', playRoute);
 app.use('/search', searchRoute);
+app.use('/transferdetail', transferDetailRoute);
 
 server.listen(PORT, () => {
   console.log('Server running...');

@@ -58,7 +58,6 @@ router.post(`/cashierclose`, async (req, res) => {
   }
 });
 
-//checkUserSession
 router.post('/', async (req, res) => {
   try {
     const userLogOut = await pool.query(
