@@ -16,6 +16,7 @@ const playRoute = require('./routes/playground');
 const searchRoute = require('./routes/search');
 const kitchenRoute = require('./routes/kitchen');
 const transferDetailRoute = require('./routes/transferdetail');
+const cashierlogRoute = require('./routes/cashierlog');
 //other
 
 //Basic express middelware
@@ -102,6 +103,7 @@ app.use('/kitchen', kitchenRoute);
 app.use('/playground', playRoute);
 app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
+app.use('/cashierlog', cashierlogRoute);
 
 server.listen(PORT, () => {
   console.log('Server running...');
