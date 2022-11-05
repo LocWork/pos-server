@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-//Check user has session
+//GET USER session
 router.get('/session', async (req, res) => {
   try {
     if (req.session.user && req.session.shiftId) {
@@ -113,6 +113,7 @@ async function validateWaiterAndKitchen(req, res, next) {
   }
 }
 
+//
 async function validateCashier(req, res, next) {
   try {
     if (req.session.user.role == sob.CASHIER) {
@@ -165,7 +166,7 @@ router.post(
   }
 );
 
-//UC get cashier shift
+//GET SHIFT list
 router.get(`/shift`, async (req, res) => {
   try {
     const shiftList = await pool.query(`
@@ -192,9 +193,10 @@ router.get(`/shift`, async (req, res) => {
   }
 });
 
-router.put(`/cashieropen`, async (req, res) => {
+router.put(`/cashieropen/:shiftid`, async (req, res) => {
   try {
-    const { shiftid, amount } = req.body;
+    const { shiftid } = req.params;
+    const { amount } = req.body;
     const updateShift = await pool.query(
       `UPDATE "shift" SET isOpen = true, openerid = $1 WHERE id = $2 AND status = 'ACTIVE' returning id`,
       [req.session.user.id, shiftid]

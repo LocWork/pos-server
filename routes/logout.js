@@ -17,6 +17,7 @@ async function checkSession(req, res, next) {
   }
 }
 
+//GET ROLE
 router.get('/role', checkSession, async (req, res) => {
   try {
     res.status(200).json({ role: req.session.user.role });
@@ -26,7 +27,8 @@ router.get('/role', checkSession, async (req, res) => {
   }
 });
 
-router.post(`/cashierclose`, async (req, res) => {
+//2 Cashier close if role is cashier PUT CAHISER close
+router.put(`/cashierclose`, async (req, res) => {
   try {
     const { amount } = req.body;
     const updateShift = await pool.query(
@@ -58,6 +60,7 @@ router.post(`/cashierclose`, async (req, res) => {
   }
 });
 
+//3 Logout
 router.post('/', async (req, res) => {
   try {
     const userLogOut = await pool.query(

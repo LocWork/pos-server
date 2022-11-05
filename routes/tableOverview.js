@@ -44,7 +44,16 @@ async function doesTableHaveCheck(req, res, next) {
         `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
         [id]
       );
-      res.status(200).json({ checkid: tableCheck.rows[0].id });
+      const secondTableLocation = await pool.query(
+        `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
+        [id]
+      );
+
+      res.status(200).json({
+        checkid: tableCheck.rows[0].id,
+        tableid: id,
+        locationid: secondTableLocation.rows[0].locationid,
+      });
     } else {
       next();
     }
@@ -54,17 +63,17 @@ async function doesTableHaveCheck(req, res, next) {
   }
 }
 
-async function massViewUpdate(req, res) {
+async function massViewUpdate(currentLocationId, req, res) {
   try {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
     if (req.session.locationid && req.session.locationid != 0) {
       req.io
-        .to(`POS-L-${req.session.locationid}`)
+        .to(`POS-L-${currentLocationId}`)
         .emit(
           'update-pos-tableOverview',
-          await helpers.updateTableOverview(req.session.locationid)
+          await helpers.updateTableOverview(currentLocationId)
         );
     }
     req.io
@@ -86,7 +95,7 @@ async function isFirstTableInUse(req, res, next) {
     if (tableStatus.rows[0]) {
       if (tableStatus.rows[0].status == sob.IN_USE) {
         const tableCheck = await pool.query(
-          `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+          `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
           [id1]
         );
         if (tableCheck.rows[0]) {
@@ -174,11 +183,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-//UC View location table
+//GET location table
 router.get('/location/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    req.session.locationid = id;
     if (id != 0) {
       const tables = await pool.query(
         `SELECT T.id, T.status, T.name AS tableName,C.id as checkid ,C.totalamount, C.cover, SUM(CASE WHEN D.status = 'WAITING' THEN 1 ELSE 0 END) > 0 AS isWaiting, SUM(CASE WHEN D.status = 'READY' THEN 1 ELSE 0 END) > 0 AS isReady,SUM(CASE WHEN D.status = 'RECALL' THEN 1 ELSE 0 END) > 0 AS isRecall
@@ -228,7 +236,7 @@ router.get('/location/:id', async (req, res) => {
   }
 });
 
-//OPEN table
+//PUT OPEN table
 router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
   try {
     const { id } = req.params;
@@ -253,7 +261,17 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
           `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
           [id]
         );
-        res.status(200).json({ checkid: createCheck.rows[0].id });
+
+        const secondTableLocation = await pool.query(
+          `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
+          [id]
+        );
+
+        res.status(200).json({
+          checkid: createCheck.rows[0].id,
+          tableid: id,
+          locationid: secondTableLocation.rows[0].locationid,
+        });
       } else {
         res.status(400).json({ msg: 'Không thể tạo đơn' });
       }
@@ -265,51 +283,6 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
 });
 
 //Get check detail from table;
-router.get(
-  `/table1/:id1/table2/:id2`,
-  isFirstTableInUse,
-  isSecondTableInUse,
-  async (req, res) => {
-    try {
-      const { id1, id2 } = req.params;
-
-      const table1Check = await pool.query(
-        `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
-        [id1]
-      );
-
-      const table2Check = await pool.query(
-        `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
-        [id2]
-      );
-
-      const checkDetail = await pool.query(
-        `
-      SELECT D.id, I.name, D.quantity, D.amount, D.status
-      FROM "table" AS T
-      JOIN "check" AS C
-      ON T.id = C.tableid
-      JOIN checkdetail AS D
-      ON D.checkid = C.id
-      JOIN item AS I
-      ON I.id = D.itemid
-      WHERE T.status = 'IN_USE' AND C.status = 'ACTIVE' AND (D.status != 'VOID' AND D.status != 'RECALL') AND T.id = $1;
-      `,
-        [id1]
-      );
-      const table1CheckWithDetail = _.merge(table1Check.rows[0], {
-        checkdetail: checkDetail.rows,
-      });
-      res
-        .status(200)
-        .json({ table1: table1CheckWithDetail, table2: table2Check.rows[0] });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
-    }
-  }
-);
-
 //Transfer table
 router.put(
   '/transfer/table1/:id1/table2/:id2',
@@ -318,6 +291,7 @@ router.put(
   async (req, res) => {
     try {
       const { id1, id2 } = req.params;
+      const { locationid } = req.body;
       const firstTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
         [id1]
@@ -383,7 +357,7 @@ router.put(
           `UPDATE "table" SET status ='NOT_USE' WHERE id = $1`,
           [id1]
         );
-        await massViewUpdate(req, res);
+        await massViewUpdate(locationid, req, res);
         res.status(200).json('Chuyển bàn thành công!');
       } else {
         res.status(400).json('Không thể chuyển bàn!');
@@ -396,3 +370,48 @@ router.put(
 );
 
 module.exports = router;
+
+//router.get(
+//   `/table1/:id1/table2/:id2`,
+//   isFirstTableInUse,
+//   isSecondTableInUse,
+//   async (req, res) => {
+//     try {
+//       const { id1, id2 } = req.params;
+
+//       const table1Check = await pool.query(
+//         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+//         [id1]
+//       );
+
+//       const table2Check = await pool.query(
+//         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+//         [id2]
+//       );
+
+//       const checkDetail = await pool.query(
+//         `
+//       SELECT D.id, I.name, D.quantity, D.amount, D.status
+//       FROM "table" AS T
+//       JOIN "check" AS C
+//       ON T.id = C.tableid
+//       JOIN checkdetail AS D
+//       ON D.checkid = C.id
+//       JOIN item AS I
+//       ON I.id = D.itemid
+//       WHERE T.status = 'IN_USE' AND C.status = 'ACTIVE' AND (D.status != 'VOID' AND D.status != 'RECALL') AND T.id = $1;
+//       `,
+//         [id1]
+//       );
+//       const table1CheckWithDetail = _.merge(table1Check.rows[0], {
+//         checkdetail: checkDetail.rows,
+//       });
+//       res
+//         .status(200)
+//         .json({ table1: table1CheckWithDetail, table2: table2Check.rows[0] });
+//     } catch (error) {
+//       console.log(error);
+//       res.status(400).json({ msg: 'Lỗi hệ thống!' });
+//     }
+//   }
+// )

@@ -37,17 +37,17 @@ async function isAllItemServed(req, res, next) {
   }
 }
 
-async function massViewUpdate(req, res) {
+async function massViewUpdate(currentLocationId, req, res) {
   try {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
 
     req.io
-      .to(`POS-L-${req.session.locationid}`)
+      .to(`POS-L-${currentLocationId}`)
       .emit(
         'update-pos-tableOverview',
-        await helpers.updateTableOverview(req.session.locationid)
+        await helpers.updateTableOverview(currentLocationId)
       );
 
     req.io
@@ -82,7 +82,7 @@ async function hasCheckBeenRefund(req, res, next) {
 
 router.post('/check/process', isAllItemServed, async (req, res) => {
   try {
-    const { checkid, paymentlist } = req.body;
+    const { checkid, paymentlist, locationid } = req.body;
     const billno = await helpers.billNoString();
     const validate = await pool.query(
       'SELECT id FROM "bill" WHERE billno = $1',
@@ -174,7 +174,7 @@ router.post('/check/process', isAllItemServed, async (req, res) => {
             `UPDATE "check" SET status = 'CLOSED', updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
             [req.session.user.id, checkid]
           );
-          await massViewUpdate(req, res);
+          await massViewUpdate(locationid, req, res);
           res.status(200).json({ msg: 'Thanh toán thành công' });
         } else {
           res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });

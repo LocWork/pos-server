@@ -5,22 +5,52 @@ const sob = require('../staticObj');
 const helpers = require('../utils/helpers');
 const _ = require('lodash');
 
-async function massViewUpdate(req, res) {
+async function checkRoleWaiterAndCashier(req, res, next) {
+  try {
+    if (
+      req.session.user.role == sob.WAITER ||
+      req.session.user.role == sob.CASHIER
+    ) {
+      next();
+    } else {
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function massViewUpdate(currentLocationId, req, res) {
   try {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
 
     req.io
-      .to(`POS-L-${req.session.locationid}`)
+      .to(`POS-L-${currentLocationId}`)
       .emit(
         'update-pos-tableOverview',
-        await helpers.updateTableOverview(req.session.locationid)
+        await helpers.updateTableOverview(currentLocationId)
       );
 
     req.io
       .to(`KDS-L-0`)
       .emit('update-kds-kitchen', await helpers.updateKitchen());
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function overviewUpdate(currentLocationId, req, res) {
+  try {
+    req.io
+      .to(`POS-L-${currentLocationId}`)
+      .emit(
+        'update-pos-tableOverview',
+        await helpers.updateTableOverview(currentLocationId)
+      );
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -90,16 +120,16 @@ async function canItemTransfer(req, res, next) {
     for (var i = 0; i < detaillist.length; i++) {
       var item = await pool.query(
         `SELECT id FROM checkdetail WHERE id = $1 AND (status != 'VOID' AND status != 'RECALL')`,
-        [detailid[i].id]
+        [detaillist[i].id]
       );
       if (!item.rows[0]) {
         flag = false;
       }
     }
     if (flag) {
-      res.status(400).json('Không thể tách đơn do thông tin thay đổi');
-    } else {
       next();
+    } else {
+      res.status(400).json('Không thể tách đơn do thông tin thay đổi');
     }
   } catch (error) {
     console.log(error);
@@ -309,7 +339,7 @@ router.put(
   isSecondTableInUse,
   async (req, res) => {
     try {
-      const { id1, id2, detaillist } = req.body;
+      const { id1, id2, detaillist, locationid } = req.body;
 
       const firstTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
@@ -318,6 +348,11 @@ router.put(
 
       const secondTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+        [id2]
+      );
+
+      const secondTableLocation = await pool.query(
+        `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
         [id2]
       );
 
@@ -363,7 +398,9 @@ router.put(
           );
         }
       }
-      await massViewUpdate(req, res);
+      await massViewUpdate(locationid, req, res);
+      await overviewUpdate(secondTableLocation.rows[0].locationid, req, res);
+
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);
@@ -446,7 +483,7 @@ router.put(
   isSecondTableInUse,
   async (req, res) => {
     try {
-      const { id1, id2, percent } = req.body;
+      const { id1, id2, percent, locationid } = req.body;
 
       const firstTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
@@ -455,6 +492,11 @@ router.put(
 
       const secondTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+        [id2]
+      );
+
+      const secondTableLocation = await pool.query(
+        `SELECT locationid FROM "table" WHERE tableId = $1 AND status = 'IN_USE' LIMIT 1`,
         [id2]
       );
 
@@ -497,7 +539,8 @@ router.put(
           );
         }
       }
-      await massViewUpdate(req, res);
+      await massViewUpdate(locationid, req, res);
+      await overviewUpdate(secondTableLocation.rows[0].locationid, req, res);
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);

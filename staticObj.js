@@ -6,6 +6,7 @@ class sob {
   static IN_USE = 'IN_USE';
   static NOT_USE = 'NOT_USE';
   static ACTIVE = 'ACTIVE';
+  static READY = 'READY';
 }
 
 module.exports = sob;

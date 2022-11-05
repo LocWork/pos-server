@@ -179,7 +179,6 @@ const updateKitchen = async () => {
       }
       checkInfo.push(_.merge(checkList.rows[i], { checkdetail: temp }));
     }
-    console.log({ checkInfo });
     return { checkInfo };
   } catch (error) {
     console.log(error);
