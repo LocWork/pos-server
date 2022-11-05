@@ -45,13 +45,13 @@ async function doesTableHaveCheck(req, res, next) {
         [id]
       );
       const secondTableLocation = await pool.query(
-        `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
+        `SELECT id, locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
         [id]
       );
 
       res.status(200).json({
         checkid: tableCheck.rows[0].id,
-        tableid: id,
+        tableid: secondTableLocation.rows[0].id,
         locationid: secondTableLocation.rows[0].locationid,
       });
     } else {
@@ -263,13 +263,13 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
         );
 
         const secondTableLocation = await pool.query(
-          `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
+          `SELECT id, locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
           [id]
         );
 
         res.status(200).json({
           checkid: createCheck.rows[0].id,
-          tableid: id,
+          tableid: secondTableLocation.rows[0].id,
           locationid: secondTableLocation.rows[0].locationid,
         });
       } else {
