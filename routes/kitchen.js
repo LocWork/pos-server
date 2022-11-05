@@ -4,6 +4,7 @@ const pool = require('../db');
 const _ = require('lodash');
 const helpers = require('../utils/helpers');
 const sob = require('../staticObj');
+
 async function checkRoleKitchen(req, res, next) {
   try {
     if (req.session.user.role == sob.KITCHEN) {
@@ -16,6 +17,8 @@ async function checkRoleKitchen(req, res, next) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
+
+// router.use(checkRoleKitchen);
 
 async function massViewUpdate(id, req, res) {
   try {
@@ -65,7 +68,6 @@ async function massViewUpdateList(list, req, res) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-// router.use(checkRoleKitchen);
 
 //GET CHECK
 router.get('/', async (req, res) => {

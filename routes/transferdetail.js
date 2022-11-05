@@ -21,6 +21,8 @@ async function checkRoleWaiterAndCashier(req, res, next) {
   }
 }
 
+//router.use(checkRoleWaiterAndCashier);
+
 async function massViewUpdate(currentLocationId, req, res) {
   try {
     req.io

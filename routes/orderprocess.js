@@ -19,6 +19,8 @@ async function checkRoleCashier(req, res, next) {
   }
 }
 
+//router.use(checkRoleCashier);
+
 async function isAllItemServed(req, res, next) {
   try {
     const { checkid } = req.body;
@@ -77,8 +79,6 @@ async function hasCheckBeenRefund(req, res, next) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-
-//router.use(checkRoleCashier);
 
 router.post('/check/process', isAllItemServed, async (req, res) => {
   try {

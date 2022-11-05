@@ -4,6 +4,21 @@ const pool = require('../db');
 const sob = require('../staticObj');
 const _ = require('lodash');
 
+async function checkRoleCashier(req, res, next) {
+  try {
+    if (req.session.user.role == sob.CASHIER) {
+      next();
+    } else {
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+//router.use(checkRoleCashier);
+
 router.get('/', async (req, res) => {
   try {
     const list =

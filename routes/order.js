@@ -22,6 +22,8 @@ async function checkRoleWaiterAndCashier(req, res, next) {
   }
 }
 
+//router.use(checkRoleWaiterAndCashier);
+
 async function isCheckActiveToVoid(req, res, next) {
   try {
     const { id } = req.params;
@@ -137,8 +139,6 @@ async function isAllItemInStock(req, res, next) {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 }
-
-//router.use(checkRoleWaiterAndCashier);
 
 router.get('/voidreason/', async (req, res) => {
   try {

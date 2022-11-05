@@ -6,9 +6,12 @@ const _ = require('lodash');
 const helpers = require('../utils/helpers');
 const { check } = require('express-validator');
 
-async function checkRoleCashier(req, res, next) {
+async function checkRoleWaiterAndCashier(req, res, next) {
   try {
-    if (req.session.user.role == sob.CASHIER) {
+    if (
+      req.session.user.role == sob.WAITER ||
+      req.session.user.role == sob.CASHIER
+    ) {
       next();
     } else {
       res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
@@ -19,18 +22,7 @@ async function checkRoleCashier(req, res, next) {
   }
 }
 
-async function checkRoleWaiter(req, res, next) {
-  try {
-    if (req.session.user.role == sob.WAITER) {
-      next();
-    } else {
-      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-}
+//router.use(checkRoleWaiterAndCashier);
 
 async function doesTableHaveCheck(req, res, next) {
   try {
