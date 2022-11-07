@@ -106,7 +106,7 @@ app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
 app.use('/cashierlog', cashierlogRoute);
 
-server.listen(PORT, () => {
+server.listen(process.env.PORT, () => {
   console.log('Server running...');
 });
 
