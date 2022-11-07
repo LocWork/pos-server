@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start --omit=dev": "nodemon ./index.js "
+    "deploy": "nodemon ./index.js ",
+    "start": "nodemon ./index.js "
   },
   "author": "",
   "license": "ISC",
