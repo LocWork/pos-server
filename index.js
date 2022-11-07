@@ -63,20 +63,21 @@ app.use(function (req, res, next) {
   next();
 });
 
-// io.on('connection', (socket) => {
-//   console.log('A new user just connected');
-//   socket.on('join-pos-location', (room) => {
-//     var location = `POS-L-${room}`;
-//     socket.join(location);
-//     console.log(`you have join pos location: ${location}`);
-//   });
+io.on('connection', (socket) => {
+  console.log('A new user just connected');
+  socket.on('join-pos-location', (room) => {
+    var location = `POS-L-${room}`;
+    socket.join(location);
+    console.log(`you have join pos location: ${location}`);
+  });
 
-//   socket.on('join-kds-location', (room) => {
-//     var kds = `KDS-L-${room}`;
-//     socket.join(kds);
-//     console.log(`you have join kds location: ${kds}`);
-//   });
-// });
+  socket.on('join-kds-location', (room) => {
+    var kds = `KDS-L-${room}`;
+    socket.join(kds);
+    console.log(`you have join kds location: ${kds}`);
+  });
+});
+
 const compression = require('compression');
 app.use(compression());
 
@@ -108,10 +109,11 @@ app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
 app.use('/cashierlog', cashierlogRoute);
 
-// server.listen(`0.0.0.0:7184`, () => {
-//   console.log('Server running...');
-// });
 console.log(PORT);
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Connected at port ${PORT}`);
+server.listen(`0.0.0.0:${PORT}`, () => {
+  console.log('Server running...');
 });
+
+// app.listen(`0.0.0.0:${PORT}`, () => {
+//   console.log(`Connected at port ${PORT}`);
+// });
