@@ -9,7 +9,7 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 // route
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
-const tableOverview = require('./routes/tabloverview');
+const tableOverview = require('./routes/tableoverview');
 const orderRoute = require('./routes/order');
 const orderProcessRoute = require('./routes/orderprocess.js');
 const playRoute = require('./routes/playground');
@@ -106,7 +106,7 @@ app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
 app.use('/cashierlog', cashierlogRoute);
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log('Server running...');
 });
 
