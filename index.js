@@ -33,7 +33,7 @@ const Knex = require('knex');
 const knex = Knex({
   client: 'pg',
   connection: {
-    host: '127.0.0.1',
+    host: '0.0.0.0',
     user: 'postgres',
     password: 'qwe',
     database: 'restaurant',
@@ -109,13 +109,9 @@ app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
 app.use('/cashierlog', cashierlogRoute);
 
-try {
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log('Server running...');
-  });
-} catch (error) {
-  console.log(error);
-}
+server.listen(PORT, () => {
+  console.log('Server running...');
+});
 
 // app.listen(`0.0.0.0:${PORT}`, () => {
 //   console.log(`Connected at port ${PORT}`);
