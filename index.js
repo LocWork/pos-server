@@ -111,7 +111,7 @@ app.use('/cashierlog', cashierlogRoute);
 // server.listen(`0.0.0.0:7184`, () => {
 //   console.log('Server running...');
 // });
-
+console.log(PORT);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Connected at port ${PORT}`);
 });
