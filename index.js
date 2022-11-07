@@ -88,21 +88,6 @@ app.use(compression());
 app.use('/login', loginRoute);
 app.use('/logout', logoutRoute);
 
-async function checkUserSession(req, res, next) {
-  try {
-    if (req.session.user && req.session.shiftId) {
-      next();
-    } else {
-      res.status(400).json({ msg: 'Xin đăng nhập lại vào hệ thống' });
-    }
-  } catch (error) {
-    console.log(error);
-    res
-      .status(400)
-      .json({ msg: 'Lỗi hệ thống, không thể kiểm tra người dùng!' });
-  }
-}
-
 app.use(checkUserSession);
 app.use('/tableoverview', tableOverview);
 app.use('/order', orderRoute);
