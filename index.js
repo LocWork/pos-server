@@ -30,36 +30,32 @@ const KnexSessionStore = require('connect-session-knex')(session);
 
 const Knex = require('knex');
 
-try {
-  const knex = Knex({
-    client: 'pg',
-    connection: {
-      host: '0.0.0.0',
-      user: 'postgres',
-      password: 'qwe',
-      database: 'restaurant',
+const knex = Knex({
+  client: 'pg',
+  connection: {
+    host: 'localhost',
+    user: 'postgres',
+    password: 'qwe',
+    database: 'restaurant',
+  },
+});
+
+const store = new KnexSessionStore({
+  knex,
+  tablename: 'sessions', // optional. Defaults to 'sessions'
+});
+
+app.use(
+  session({
+    secret: 'POSRES',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 10 * 60 * 60 * 1000, // ten seconds, for testing
     },
-  });
-
-  const store = new KnexSessionStore({
-    knex,
-    tablename: 'sessions', // optional. Defaults to 'sessions'
-  });
-
-  app.use(
-    session({
-      secret: 'POSRES',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: 10 * 60 * 60 * 1000, // ten seconds, for testing
-      },
-      store,
-    })
-  );
-} catch (error) {
-  console.log(error);
-}
+    store,
+  })
+);
 
 //IO
 app.use(function (req, res, next) {
