@@ -77,6 +77,8 @@ app.use(function (req, res, next) {
 //     console.log(`you have join kds location: ${kds}`);
 //   });
 // });
+const compression = require('compression');
+app.use(compression());
 
 app.use('/login', loginRoute);
 app.use('/logout', logoutRoute);
