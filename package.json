@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "nodemon ./index.js ",
+    "deploy": "npm install --omit=dev ",
     "start": "nodemon ./index.js "
   },
   "author": "",
