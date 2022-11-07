@@ -63,20 +63,20 @@ app.use(function (req, res, next) {
   next();
 });
 
-io.on('connection', (socket) => {
-  console.log('A new user just connected');
-  socket.on('join-pos-location', (room) => {
-    var location = `POS-L-${room}`;
-    socket.join(location);
-    console.log(`you have join pos location: ${location}`);
-  });
+// io.on('connection', (socket) => {
+//   console.log('A new user just connected');
+//   socket.on('join-pos-location', (room) => {
+//     var location = `POS-L-${room}`;
+//     socket.join(location);
+//     console.log(`you have join pos location: ${location}`);
+//   });
 
-  socket.on('join-kds-location', (room) => {
-    var kds = `KDS-L-${room}`;
-    socket.join(kds);
-    console.log(`you have join kds location: ${kds}`);
-  });
-});
+//   socket.on('join-kds-location', (room) => {
+//     var kds = `KDS-L-${room}`;
+//     socket.join(kds);
+//     console.log(`you have join kds location: ${kds}`);
+//   });
+// });
 
 app.use('/login', loginRoute);
 app.use('/logout', logoutRoute);
