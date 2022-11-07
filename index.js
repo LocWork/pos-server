@@ -2,7 +2,8 @@
 const express = require('express');
 const session = require('express-session');
 const app = express();
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 // socket
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, { cors: { origin: '*' } });
