@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node index.js"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -14,6 +16,7 @@
     "express-session": "^1.17.3",
     "express-validator": "^6.14.2",
     "lodash": "^4.17.21",
+    "node": "^16.13.2",
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",
     "randomstring": "^1.2.2",
