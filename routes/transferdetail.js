@@ -498,7 +498,7 @@ router.put(
       );
 
       const secondTableLocation = await pool.query(
-        `SELECT locationid FROM "table" WHERE tableId = $1 AND status = 'IN_USE' LIMIT 1`,
+        `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
         [id2]
       );
 
