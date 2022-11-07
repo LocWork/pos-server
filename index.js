@@ -26,24 +26,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 //Session
-const KnexSessionStore = require('connect-session-knex')(session);
+// const KnexSessionStore = require('connect-session-knex')(session);
 
-const Knex = require('knex');
+// const Knex = require('knex');
 
-const knex = Knex({
-  client: 'pg',
-  connection: {
-    host: 'localhost',
-    user: 'postgres',
-    password: 'qwe',
-    database: 'restaurant',
-  },
-});
+// const knex = Knex({
+//   client: 'pg',
+//   connection: {
+//     host: '0.0.0.0',
+//     user: 'postgres',
+//     password: 'qwe',
+//     database: 'restaurant',
+//   },
+// });
 
-const store = new KnexSessionStore({
-  knex,
-  tablename: 'sessions', // optional. Defaults to 'sessions'
-});
+// const store = new KnexSessionStore({
+//   knex,
+//   tablename: 'sessions', // optional. Defaults to 'sessions'
+// });
 
 app.use(
   session({
@@ -53,7 +53,7 @@ app.use(
     cookie: {
       maxAge: 10 * 60 * 60 * 1000, // ten seconds, for testing
     },
-    store,
+    // store,
   })
 );
 
