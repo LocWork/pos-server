@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "https://github.com/LocWork/pos-server/blob/master/index.js"
+    "main": "index.js"
   },
   "author": "",
   "license": "ISC",
