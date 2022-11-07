@@ -233,7 +233,7 @@ router.get('/check/:id', async (req, res) => {
       for (var i = 0; i < check.rows.length; i++) {
         var checkDetailList = await pool.query(
           `
-       SELECT D.id AS checkDetailId, I.name AS itemname, I.id AS itemid, D.quantity, D.note, D.isReminded, D.amount, D.status
+       SELECT D.id AS checkDetailId, I.name AS itemname, I.id AS itemid, D.quantity, D.note, D.isReminded, D.subtotal, D.status
        FROM "check" AS C
  	     JOIN checkdetail AS D
        ON C.id = D.checkid
