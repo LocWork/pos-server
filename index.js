@@ -30,24 +30,20 @@ const KnexSessionStore = require('connect-session-knex')(session);
 
 const Knex = require('knex');
 
-try {
-  const knex = Knex({
-    client: 'pg',
-    connection: {
-      host: '0.0.0.0',
-      user: 'postgres',
-      password: 'qwe',
-      database: 'restaurant',
-    },
-  });
+const knex = Knex({
+  client: 'pg',
+  connection: {
+    host: '0.0.0.0',
+    user: 'postgres',
+    password: 'qwe',
+    database: 'restaurant',
+  },
+});
 
-  const store = new KnexSessionStore({
-    knex,
-    tablename: 'sessions', // optional. Defaults to 'sessions'
-  });
-} catch (error) {
-  console.log(error);
-}
+const store = new KnexSessionStore({
+  knex,
+  tablename: 'sessions', // optional. Defaults to 'sessions'
+});
 
 app.use(
   session({
@@ -67,20 +63,24 @@ app.use(function (req, res, next) {
   next();
 });
 
-io.on('connection', (socket) => {
-  console.log('A new user just connected');
-  socket.on('join-pos-location', (room) => {
-    var location = `POS-L-${room}`;
-    socket.join(location);
-    console.log(`you have join pos location: ${location}`);
-  });
+try {
+  io.on('connection', (socket) => {
+    console.log('A new user just connected');
+    socket.on('join-pos-location', (room) => {
+      var location = `POS-L-${room}`;
+      socket.join(location);
+      console.log(`you have join pos location: ${location}`);
+    });
 
-  socket.on('join-kds-location', (room) => {
-    var kds = `KDS-L-${room}`;
-    socket.join(kds);
-    console.log(`you have join kds location: ${kds}`);
+    socket.on('join-kds-location', (room) => {
+      var kds = `KDS-L-${room}`;
+      socket.join(kds);
+      console.log(`you have join kds location: ${kds}`);
+    });
   });
-});
+} catch (error) {
+  console.log(error);
+}
 
 const compression = require('compression');
 app.use(compression());
