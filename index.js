@@ -108,10 +108,10 @@ app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
 app.use('/cashierlog', cashierlogRoute);
 
-server.listen(`0.0.0.0:7184`, () => {
-  console.log('Server running...');
-});
-
-// app.listen(PORT, '0.0.0.0', () => {
-//   console.log(`Connected at port ${PORT}`);
+// server.listen(`0.0.0.0:7184`, () => {
+//   console.log('Server running...');
 // });
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Connected at port ${PORT}`);
+});
