@@ -9,7 +9,7 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 // route
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
-const tableOverview = require('./routes/tableoverview');
+const tableOverview = require('./routes/tabloverview');
 const orderRoute = require('./routes/order');
 const orderProcessRoute = require('./routes/orderprocess.js');
 const playRoute = require('./routes/playground');
