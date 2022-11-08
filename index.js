@@ -26,9 +26,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 //Session
-// const KnexSessionStore = require('connect-session-knex')(session);
+const KnexSessionStore = require('connect-session-knex')(session);
 
-// const Knex = require('knex');
+const Knex = require('knex');
 
 // const knex = Knex({
 //   client: 'pg',
@@ -40,10 +40,20 @@ app.use(express.urlencoded({ extended: false }));
 //   },
 // });
 
-// const store = new KnexSessionStore({
-//   knex,
-//   tablename: 'sessions', // optional. Defaults to 'sessions'
-// });
+const knex = Knex({
+  client: 'pg',
+  connection: {
+    host: 'containers-us-west-99.railway.app',
+    user: 'postgres',
+    password: 'vUXvc4enWOT7kJfexO3O',
+    database: 'railway',
+  },
+});
+
+const store = new KnexSessionStore({
+  knex,
+  tablename: 'sessions', // optional. Defaults to 'sessions'
+});
 
 app.use(
   session({
@@ -53,7 +63,7 @@ app.use(
     cookie: {
       maxAge: 10 * 60 * 60 * 1000, // ten seconds, for testing
     },
-    // store,
+    store,
   })
 );
 
