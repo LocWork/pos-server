@@ -166,7 +166,7 @@ async function createCheck(req, res, next) {
 router.get('/', async (req, res) => {
   try {
     const list = await pool.query(
-      `SELECT id as locationId, name FROM "location" WHERE status != 'INACTIVE'`
+      `SELECT id as locationId, name FROM "location" WHERE status != 'INACTIVE' ORDER BY id ASC`
     );
     res.status(200).json(list.rows);
   } catch (error) {
