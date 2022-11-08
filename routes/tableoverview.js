@@ -192,7 +192,6 @@ router.get('/location/:id', async (req, res) => {
         [id]
       );
       res.status(200).json({
-        locationId: id,
         tables: tables.rows,
       });
     } else {
@@ -212,7 +211,6 @@ router.get('/location/:id', async (req, res) => {
         T.id
         ;`);
       res.status(200).json({
-        locationId: id,
         tables: tables.rows,
       });
     }

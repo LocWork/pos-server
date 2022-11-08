@@ -176,7 +176,7 @@ router.get('/menu/:id/instock', async (req, res) => {
       FROM menu AS M
       JOIN menuitem AS MI
       ON MI.menuid = M.id
-      JOIN item AS I
+      JOIN 
       ON MI.itemid = I.id
       WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
       `,
@@ -185,11 +185,7 @@ router.get('/menu/:id/instock', async (req, res) => {
     } else {
       getMenuItems = await pool.query(`
       SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
-      FROM menu AS M
-      JOIN menuitem AS MI
-      ON MI.menuid = M.id
-      JOIN item AS I
-      ON MI.itemid = I.id
+      FROM item AS I
       WHERE I.status = 'ACTIVE' AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
       `);
     }
@@ -221,11 +217,7 @@ router.get('/menu/:id/outofstock', async (req, res) => {
     } else {
       getMenuItems = await pool.query(`
       SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
-      FROM menu AS M
-      JOIN menuitem AS MI
-      ON MI.menuid = M.id
-      JOIN item AS I
-      ON MI.itemid = I.id
+      FROM item AS I
       WHERE I.status = 'ACTIVE' AND I.id IN (SELECT itemid AS id FROM itemoutofstock)
       `);
     }

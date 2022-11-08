@@ -73,24 +73,20 @@ app.use(function (req, res, next) {
   next();
 });
 
-try {
-  io.on('connection', (socket) => {
-    console.log('A new user just connected');
-    socket.on('join-pos-location', (room) => {
-      var location = `POS-L-${room}`;
-      socket.join(location);
-      console.log(`you have join pos location: ${location}`);
-    });
-
-    socket.on('join-kds-location', (room) => {
-      var kds = `KDS-L-${room}`;
-      socket.join(kds);
-      console.log(`you have join kds location: ${kds}`);
-    });
+io.on('connection', (socket) => {
+  console.log('A new user just connected');
+  socket.on('join-pos-location', (room) => {
+    var location = `POS-L-${room}`;
+    socket.join(location);
+    console.log(`you have join pos location: ${location}`);
   });
-} catch (error) {
-  console.log(error);
-}
+
+  socket.on('join-kds-location', (room) => {
+    var kds = `KDS-L-${room}`;
+    socket.join(kds);
+    console.log(`you have join kds location: ${kds}`);
+  });
+});
 
 const compression = require('compression');
 app.use(compression());
