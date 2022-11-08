@@ -174,18 +174,28 @@ router.get(`/shift`, async (req, res) => {
     FROM shift AS S 
     JOIN worksession AS W 
     ON S.worksessionid = W.id 
-    WHERE W.isopen = true AND W.workdate = CURRENT_DATE AND ((NOW()::time <= S.starttime) OR (NOW()::time >= S.starttime AND NOW()::time < S.endtime)) AND (S.starttime >= COALESCE((SELECT endtime FROM "shift" WHERE openerid is not null ORDER BY endtime DESC LIMIT 1),'00:00:00'))
+    WHERE W.isopen = true AND W.workdate = CURRENT_DATE AND 
+	((NOW()::time <= S.starttime) OR (NOW()::time >= S.starttime AND NOW()::time < S.endtime)) 
+	AND (S.starttime >= COALESCE(
+		(SELECT MAX(S1.endtime) as time FROM "shift" AS S1 
+		 JOIN worksession AS W1 
+    	 ON S1.worksessionid = W1.id 
+		 WHERE S1.isopen = true
+		 AND W1.workdate = CURRENT_DATE
+		 AND W1.isopen = true
+		 GROUP BY S1.endtime
+		 ORDER BY S1.endtime DESC LIMIT 1),'00:00:00')
+		)
     AND S.openerid IS NULL AND S.status = 'ACTIVE' AND S.isopen = false
     ORDER BY
     S.starttime
-    ASC
-    ;
+    ASC;
     `);
     if (shiftList.rows) {
       res.status(200).json({ shiftList: shiftList.rows });
     } else {
       req.session.destroy();
-      res.status(400).json({ msg: 'Hiện tại chưa có ca làm việc!' });
+      res.status(200).json({ shiftList: [] });
     }
   } catch (error) {
     console.log(error);

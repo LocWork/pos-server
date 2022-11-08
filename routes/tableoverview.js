@@ -254,15 +254,9 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
           [id]
         );
 
-        const secondTableLocation = await pool.query(
-          `SELECT id, locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
-          [id]
-        );
-
         res.status(200).json({
           checkid: createCheck.rows[0].id,
           tableid: secondTableLocation.rows[0].id,
-          locationid: secondTableLocation.rows[0].locationid,
         });
       } else {
         res.status(400).json({ msg: 'Không thể tạo đơn' });
@@ -283,7 +277,7 @@ router.put(
   async (req, res) => {
     try {
       const { id1, id2 } = req.params;
-      const { locationid } = req.body;
+
       const firstTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
         [id1]
@@ -349,7 +343,19 @@ router.put(
           `UPDATE "table" SET status ='NOT_USE' WHERE id = $1`,
           [id1]
         );
-        await massViewUpdate(locationid, req, res);
+
+        const updatelocation = await pool.query(
+          `SELECT T.locationid AS id
+        FROM "check" AS C
+        JOIN "table" AS T
+        ON C.tableid = T.id
+        WHERE C.id = $1
+        LIMIT 1
+        ;`,
+          [secondTableCheck.rows[0].id]
+        );
+
+        await massViewUpdate(updatelocation.rows[0].id, req, res);
         res.status(200).json('Chuyển bàn thành công!');
       } else {
         res.status(400).json('Không thể chuyển bàn!');

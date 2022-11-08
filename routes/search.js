@@ -23,7 +23,7 @@ async function checkRoleCashier(req, res, next) {
 router.get(`/checklist`, async (req, res) => {
   try {
     const checkList = await pool.query(`
-    SELECT C.id, C.creationtime::TIMESTAMP::DATE, C.checkno, T.name AS tablename, L.name AS locationname, C.totaltax, C.totalamount, C.status
+    SELECT C.id, C.creationtime::TIMESTAMP::DATE, C.checkno, T.name AS tablename, T.id AS tableid, L.name AS locationname, C.totaltax, C.totalamount, C.status
     FROM "check" AS C
     JOIN "table" AS T
     ON T.id = C.tableid
@@ -56,7 +56,7 @@ router.get(`/billlist`, async (req, res) => {
   }
 });
 
-router.get(`/check/:id/`, async (req, res) => {
+router.get(`/check/:id`, async (req, res) => {
   try {
     const { id } = req.params;
     const check = await pool.query(
@@ -96,6 +96,28 @@ router.get(`/bill/:id`, async (req, res) => {
       [id]
     );
     res.status(200).json(bill.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
+router.get(`/check/:id/status`, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const check = await pool.query(
+      `
+    SELECT status
+    FROM "check" 
+    WHERE id = $1;
+   `,
+      [id]
+    );
+    if (check.rows[0]) {
+      res.status(200).json(check.rows[0]);
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy đơn hàng' });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -143,7 +165,6 @@ router.get(`/check/:id/detail`, async (req, res) => {
       );
     }
 
-    //checkInfo = _.merge(check.rows[0], { checkdetail: temp });
     res.status(200).json({ checkdetail: checkDetailList.rows });
   } catch (error) {
     console.log(error);

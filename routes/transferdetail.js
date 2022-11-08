@@ -341,15 +341,15 @@ router.put(
   isSecondTableInUse,
   async (req, res) => {
     try {
-      const { id1, id2, detaillist, locationid } = req.body;
+      const { id1, id2, detaillist } = req.body;
 
       const firstTableCheck = await pool.query(
-        `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1;`,
         [id1]
       );
 
       const secondTableCheck = await pool.query(
-        `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1`,
         [id2]
       );
 
@@ -400,9 +400,8 @@ router.put(
           );
         }
       }
-      await massViewUpdate(locationid, req, res);
-      await overviewUpdate(secondTableLocation.rows[0].locationid, req, res);
-
+      await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
+      await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);
@@ -485,20 +484,15 @@ router.put(
   isSecondTableInUse,
   async (req, res) => {
     try {
-      const { id1, id2, percent, locationid } = req.body;
+      const { id1, id2, percent } = req.body;
 
       const firstTableCheck = await pool.query(
-        `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1;`,
         [id1]
       );
 
       const secondTableCheck = await pool.query(
-        `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
-        [id2]
-      );
-
-      const secondTableLocation = await pool.query(
-        `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
+        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1`,
         [id2]
       );
 
@@ -541,8 +535,8 @@ router.put(
           );
         }
       }
-      await massViewUpdate(locationid, req, res);
-      await overviewUpdate(secondTableLocation.rows[0].locationid, req, res);
+      await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
+      await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);

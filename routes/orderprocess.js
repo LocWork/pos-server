@@ -82,7 +82,7 @@ async function hasCheckBeenRefund(req, res, next) {
 
 router.post('/check/process', isAllItemServed, async (req, res) => {
   try {
-    const { checkid, paymentlist, locationid } = req.body;
+    const { checkid, paymentlist } = req.body;
     const billno = await helpers.billNoString();
     const validate = await pool.query(
       'SELECT id FROM "bill" WHERE billno = $1',
@@ -174,7 +174,18 @@ router.post('/check/process', isAllItemServed, async (req, res) => {
             `UPDATE "check" SET status = 'CLOSED', updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
             [req.session.user.id, checkid]
           );
-          await massViewUpdate(locationid, req, res);
+          const updatelocation = await pool.query(
+            `SELECT T.locationid AS id
+            FROM "check" AS C
+            JOIN "table" AS T
+            ON C.tableid = T.id
+            WHERE C.id = $1
+            LIMIT 1
+            ;`,
+            [checkid]
+          );
+
+          await massViewUpdate(updatelocation.rows[0].id, req, res);
           res.status(200).json({ msg: 'Thanh toán thành công' });
         } else {
           res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });

@@ -227,7 +227,6 @@ router.get('/check/:id', async (req, res) => {
       [id]
     );
     if (check.rows[0]) {
-      req.session.locationid = check.rows[0].locationid;
       var checkInfo = [];
 
       for (var i = 0; i < check.rows.length; i++) {
@@ -296,12 +295,23 @@ router.get(`/check/:id/info`, async (req, res) => {
 router.put(`/check/:id/info`, async (req, res) => {
   try {
     const { id } = req.params;
-    const { guestname, cover, locationid } = req.body;
+    const { guestname, cover } = req.body;
     const updateInfomation = await pool.query(
       `UPDATE "check" SET guestName = $1, cover = $2, updaterId = $3, updateTime = CURRENT_TIMESTAMP  WHERE id = $4`,
       [guestname, cover, req.session.user.id, id]
     );
-    await overViewUpdate(locationid, req, res);
+
+    const updatelocation = await pool.query(
+      `SELECT T.locationid AS id
+      FROM "check" AS C
+      JOIN "table" AS T
+      ON C.tableid = T.id
+      WHERE C.id = $1
+      LIMIT 1
+      ;`,
+      [id]
+    );
+    await overViewUpdate(updatelocation.rows[0].id, req, res);
     res.status(200).json({ msg: 'Thông tin đã được cập nhật!' });
   } catch (error) {
     console.log(error);
@@ -390,7 +400,7 @@ router.get(`/view/specialrequest/:itemid`, async (req, res) => {
 //POST SEND ORDER
 router.post('/check/add', isCheckActive, isAllItemInStock, async (req, res) => {
   try {
-    const { checkid, itemlist, locationid } = req.body;
+    const { checkid, itemlist } = req.body;
     for (var i = 0; i < itemlist.length; i++) {
       var detail = itemlist[i];
       var checkDetailId = await pool.query(
@@ -445,7 +455,18 @@ router.post('/check/add', isCheckActive, isAllItemInStock, async (req, res) => {
       );
     }
 
-    await massViewUpdate(locationid, req, res);
+    const updatelocation = await pool.query(
+      `SELECT T.locationid AS id
+      FROM "check" AS C
+      JOIN "table" AS T
+      ON C.tableid = T.id
+      WHERE C.id = $1
+      LIMIT 1
+      ;`,
+      [checkid]
+    );
+
+    await massViewUpdate(updatelocation.rows[0].id, req, res);
     res.status(200).json();
   } catch (error) {
     console.log(error);
@@ -540,7 +561,7 @@ router.put('/detail/:id/remind', async (req, res) => {
 router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
   try {
     const { id } = req.params;
-    const { voidid, locationid } = req.body;
+    const { voidid } = req.body;
     const voidCheck = await pool.query(
       `UPDATE "check" SET status = 'VOID', updaterId = $1, voidreasonid = $2,updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
       [req.session.user.id, voidid, id]
@@ -589,7 +610,19 @@ router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
         [check.rows[0].tableid]
       );
     }
-    await massViewUpdate(locationid, req, res);
+
+    const updatelocation = await pool.query(
+      `SELECT T.locationid AS id
+      FROM "check" AS C
+      JOIN "table" AS T
+      ON C.tableid = T.id
+      WHERE C.id = $1
+      LIMIT 1
+      ;`,
+      [id]
+    );
+    await massViewUpdate(updatelocation.rows[0].id, req, res);
+
     res.status(200).json({ msg: 'Đã hủy đơn' });
   } catch (error) {
     console.log(error);
@@ -601,7 +634,7 @@ router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
 router.put(`/checkdetail/:id/void`, async (req, res) => {
   try {
     const { id } = req.params;
-    const { voidid, locationid } = req.body;
+    const { voidid } = req.body;
     const check = await pool.query(
       `SELECT checkid FROM "checkdetail" WHERE id = $1`,
       [id]
@@ -643,7 +676,19 @@ router.put(`/checkdetail/:id/void`, async (req, res) => {
         `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
         [req.session.user.id, check.rows[0].checkid]
       );
-      await massViewUpdate(locationid, req, res);
+
+      const updatelocation = await pool.query(
+        `SELECT T.locationid AS id
+      FROM "check" AS C
+      JOIN "table" AS T
+      ON C.tableid = T.id
+      WHERE C.id = $1
+      LIMIT 1
+      ;`,
+        [check.rows[0].checkid]
+      );
+
+      await massViewUpdate(updatelocation.rows[0].id, req, res);
       res.status(200).json();
     } else {
       res
@@ -673,7 +718,7 @@ router.get('/paymentmethod', async (req, res) => {
 router.put('/detail/:id/served', async (req, res) => {
   try {
     const { id } = req.params;
-    const { locationid } = req.body;
+
     const getdetailstatus = await pool.query(
       'SELECT status FROM checkdetail WHERE id = $1',
       [id]
@@ -685,7 +730,20 @@ router.put('/detail/:id/served', async (req, res) => {
           `UPDATE checkdetail SET status = 'SERVED' WHERE id = $1`,
           [id]
         );
-        await overViewUpdate(locationid, req, res);
+        const updatelocation = await pool.query(
+          `SELECT T.locationid AS id
+          FROM checkdetail AS D
+          JOIN "check" AS C
+          ON D.checkid = C.id
+          JOIN "table" AS T
+          ON C.tableid = T.id
+          WHERE D.id = $1
+          LIMIT 1
+          ;`,
+          [id]
+        );
+        await overViewUpdate(updatelocation.rows[0].id, req, res);
+
         res.status(200).json();
       } else {
         res.status(400).json({ msg: 'Món chưa hoàn tất!' });
