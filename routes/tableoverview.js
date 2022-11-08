@@ -256,7 +256,6 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
 
         res.status(200).json({
           checkid: createCheck.rows[0].id,
-          tableid: secondTableLocation.rows[0].id,
         });
       } else {
         res.status(400).json({ msg: 'Không thể tạo đơn' });

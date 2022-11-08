@@ -141,9 +141,9 @@ async function canItemTransfer(req, res, next) {
 
 async function isCheckActiveForTransfer(req, res, next) {
   try {
-    const { id1, detaillist } = req.body;
+    const { id1 } = req.body;
     const checkstatus = await pool.query(
-      `SELECT status FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
+      `SELECT status FROM "check" WHERE id = $1 AND status = 'ACTIVE' LIMIT 1`,
       [id1]
     );
     if (checkstatus.rows[0]) {
@@ -344,17 +344,12 @@ router.put(
       const { id1, id2, detaillist } = req.body;
 
       const firstTableCheck = await pool.query(
-        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1;`,
+        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.id = $1 AND C.status = 'ACTIVE' LIMIT 1;`,
         [id1]
       );
 
       const secondTableCheck = await pool.query(
         `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1`,
-        [id2]
-      );
-
-      const secondTableLocation = await pool.query(
-        `SELECT locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
         [id2]
       );
 
@@ -487,7 +482,7 @@ router.put(
       const { id1, id2, percent } = req.body;
 
       const firstTableCheck = await pool.query(
-        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.tableId = $1 AND C.status = 'ACTIVE' LIMIT 1;`,
+        `SELECT C.id, T.locationid FROM "check" AS C JOIN "table" AS T ON C.tableid = T.id WHERE C.id = $1 AND C.status = 'ACTIVE' LIMIT 1;`,
         [id1]
       );
 
