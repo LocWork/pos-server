@@ -36,15 +36,9 @@ async function doesTableHaveCheck(req, res, next) {
         `UPDATE "table" SET status = 'IN_USE' WHERE id = $1`,
         [id]
       );
-      const secondTableLocation = await pool.query(
-        `SELECT id, locationid FROM "table" WHERE id = $1 AND status = 'IN_USE' LIMIT 1`,
-        [id]
-      );
 
       res.status(200).json({
         checkid: tableCheck.rows[0].id,
-        tableid: secondTableLocation.rows[0].id,
-        locationid: secondTableLocation.rows[0].locationid,
       });
     } else {
       next();

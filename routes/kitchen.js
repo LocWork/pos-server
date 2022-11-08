@@ -284,12 +284,29 @@ router.get('/demo', async (req, res) => {
 router.put('/notify/ready/', async (req, res) => {
   try {
     const { locationlist, detaillist } = req.body;
+    // var locationlist1 = [];
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
         `UPDATE checkdetail AS D SET status = 'READY', completiontime = (NOW() - D.starttime::time) WHERE D.id = $1 AND D.status = 'WAITING'`,
         [detaillist[i].detailid]
       );
+      // const location = await pool.query(
+      //   `SELECT T.locationid AS id
+      //       FROM checkdetail AS D
+      //       JOIN "check" AS C
+      //       ON D.checkid = C.id
+      //       JOIN "table" AS T
+      //       ON C.tableid = T.id
+      //       WHERE D.id = $1
+      //       LIMIT 1
+      //       ;`,
+      //   [detaillist[i].detailid]
+      // );
+      // if (!locationlist1.includes(location.rows[0].locationid)) {
+      //   locationlist1.push(location.rows[0].locationid);
+      // }
     }
+    // await massViewUpdateList(locationlist1, req, res);
     await massViewUpdateList(locationlist, req, res);
     res.status(200).json();
   } catch (error) {
@@ -302,12 +319,29 @@ router.put('/notify/ready/', async (req, res) => {
 router.put('/notify/recall/', async (req, res) => {
   try {
     const { locationlist, detaillist } = req.body;
+    // var locationlist1 = [];
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
         `UPDATE checkdetail SET status = 'RECALL' WHERE id = $1 AND status = 'WAITING'`,
         [detaillist[i].detailid]
       );
+      // const location = await pool.query(
+      //   `SELECT T.locationid AS id
+      //       FROM checkdetail AS D
+      //       JOIN "check" AS C
+      //       ON D.checkid = C.id
+      //       JOIN "table" AS T
+      //       ON C.tableid = T.id
+      //       WHERE D.id = $1
+      //       LIMIT 1
+      //       ;`,
+      //   [detaillist[i].detailid]
+      // );
+      // if (!locationlist1.includes(location.rows[0].locationid)) {
+      //   locationlist1.push(location.rows[0].locationid);
+      // }
     }
+    //  await massViewUpdateList(locationlist1, req, res);
     await massViewUpdateList(locationlist, req, res);
     res.status(200).json();
   } catch (error) {
