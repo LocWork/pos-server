@@ -157,10 +157,6 @@ async function isCheckActiveForTransfer(req, res, next) {
   }
 }
 
-// const { id } = req.params;
-// const { detailid, tableid } = req.body;
-//transfer check detail
-
 router.get('/checkdetail/:id', async (req, res) => {
   try {
     const { id } = req.params;
