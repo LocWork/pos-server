@@ -180,7 +180,7 @@ router.get(`/shift`, async (req, res) => {
 		(SELECT MAX(S1.endtime) as time FROM "shift" AS S1 
 		 JOIN worksession AS W1 
     	 ON S1.worksessionid = W1.id 
-		 WHERE S1.isopen = true
+		 WHERE S1.openerid IS NOT NULL
 		 AND W1.workdate = CURRENT_DATE
 		 AND W1.isopen = true
 		 GROUP BY S1.endtime
