@@ -175,7 +175,7 @@ async function isCheckActiveForTransfer(req, res, next) {
   }
 }
 
-router.get('/checkdetail/:id', async (req, res) => {
+router.get('/check/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const taxValue = await pool.query(
@@ -408,7 +408,12 @@ router.put(
         req
       );
       await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
-      await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
+      if (
+        firstTableCheck.rows[0].locationid !=
+        secondTableCheck.rows[0].locationid
+      ) {
+        await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
+      }
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);
@@ -541,7 +546,12 @@ router.put(
         req
       );
       await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
-      await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
+      if (
+        firstTableCheck.rows[0].locationid !=
+        secondTableCheck.rows[0].locationid
+      ) {
+        await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
+      }
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);

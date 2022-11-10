@@ -82,7 +82,9 @@ router.get('/', async (req, res) => {
     JOIN "location" AS L
     ON L.id = T.locationid
     WHERE C.status = 'ACTIVE'
-    GROUP BY C.id , T.name, L.id, D.runningsince;
+    GROUP BY C.id , T.name, L.id, D.runningsince
+    ORDER BY D.runningsince DESC
+    ;
     `);
 
     var checkInfo = [];
