@@ -95,7 +95,7 @@ router.get('/', async (req, res) => {
        ON C.id = D.checkid
        JOIN item AS I
        ON D.itemid = I.id
-       WHERE D.status != 'VOID' AND D.status = 'WAITING' AND C.id = $1
+       WHERE D.status = 'WAITING' AND C.id = $1
        ORDER BY D.id ASC;
        `,
         [checkList.rows[i].checkid]
@@ -275,30 +275,29 @@ router.get('/demo', async (req, res) => {
 //Notify item is done ready;
 router.put('/notify/ready/', async (req, res) => {
   try {
-    const { locationlist, detaillist } = req.body;
-    // var locationlist1 = [];
+    const { detaillist } = req.body;
+    var locationlist = [];
     for (var i = 0; i < detaillist.length; i++) {
-      var updatedetail = await pool.query(
-        `UPDATE checkdetail AS D SET status = 'READY', completiontime = (NOW() - D.starttime::time) WHERE D.id = $1 AND D.status = 'WAITING'`,
+      var updateDetail = await pool.query(
+        `UPDATE checkdetail AS D SET status = 'READY', completiontime = (NOW() - D.starttime::time) WHERE D.id = $1`,
         [detaillist[i].detailid]
       );
-      // const location = await pool.query(
-      //   `SELECT T.locationid AS id
-      //       FROM checkdetail AS D
-      //       JOIN "check" AS C
-      //       ON D.checkid = C.id
-      //       JOIN "table" AS T
-      //       ON C.tableid = T.id
-      //       WHERE D.id = $1
-      //       LIMIT 1
-      //       ;`,
-      //   [detaillist[i].detailid]
-      // );
-      // if (!locationlist1.includes(location.rows[0].locationid)) {
-      //   locationlist1.push(location.rows[0].locationid);
-      // }
+      const location = await pool.query(
+        `SELECT T.locationid AS id
+            FROM checkdetail AS D
+            JOIN "check" AS C
+            ON D.checkid = C.id
+            JOIN "table" AS T
+            ON C.tableid = T.id
+            WHERE D.id = $1
+            LIMIT 1
+            ;`,
+        [detaillist[i].detailid]
+      );
+      if (!locationlist.includes(location.rows[0].id)) {
+        locationlist.push(location.rows[0].id);
+      }
     }
-    // await massViewUpdateList(locationlist1, req, res);
     await massViewUpdateList(locationlist, req, res);
     res.status(200).json();
   } catch (error) {
@@ -310,30 +309,29 @@ router.put('/notify/ready/', async (req, res) => {
 //notify item recall
 router.put('/notify/recall/', async (req, res) => {
   try {
-    const { locationlist, detaillist } = req.body;
-    // var locationlist1 = [];
+    const { detaillist } = req.body;
+    var locationlist = [];
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
-        `UPDATE checkdetail SET status = 'RECALL' WHERE id = $1 AND status = 'WAITING'`,
+        `UPDATE checkdetail SET status = 'RECALL' WHERE id = $1`,
         [detaillist[i].detailid]
       );
-      // const location = await pool.query(
-      //   `SELECT T.locationid AS id
-      //       FROM checkdetail AS D
-      //       JOIN "check" AS C
-      //       ON D.checkid = C.id
-      //       JOIN "table" AS T
-      //       ON C.tableid = T.id
-      //       WHERE D.id = $1
-      //       LIMIT 1
-      //       ;`,
-      //   [detaillist[i].detailid]
-      // );
-      // if (!locationlist1.includes(location.rows[0].locationid)) {
-      //   locationlist1.push(location.rows[0].locationid);
-      // }
+      const location = await pool.query(
+        `SELECT T.locationid AS id
+            FROM checkdetail AS D
+            JOIN "check" AS C
+            ON D.checkid = C.id
+            JOIN "table" AS T
+            ON C.tableid = T.id
+            WHERE D.id = $1
+            LIMIT 1
+            ;`,
+        [detaillist[i].detailid]
+      );
+      if (!locationlist.includes(location.rows[0].id)) {
+        locationlist.push(location.rows[0].id);
+      }
     }
-    //  await massViewUpdateList(locationlist1, req, res);
     await massViewUpdateList(locationlist, req, res);
     res.status(200).json();
   } catch (error) {

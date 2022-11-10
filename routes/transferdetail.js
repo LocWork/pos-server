@@ -23,6 +23,24 @@ async function checkRoleWaiterAndCashier(req, res, next) {
 
 //router.use(checkRoleWaiterAndCashier);
 
+async function isAllItemServed(req, res, next) {
+  try {
+    const { id1 } = req.body;
+    const checkdetail = await pool.query(
+      `SELECT status FROM "checkdetail" WHERE checkid = $1 AND status != 'SERVED' AND status != 'VOID' LIMIT 1`,
+      [id1]
+    );
+    if (checkdetail.rows[0]) {
+      res.status(400).json({ msg: 'Đơn vẫn còn món chưa sử lý!' });
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
 async function massViewUpdate(currentLocationId, req, res) {
   try {
     req.io
@@ -175,6 +193,7 @@ router.get('/checkdetail/:id', async (req, res) => {
    `,
       [id]
     );
+
     res
       .status(200)
       .json({ taxvalue: taxValue.rows[0], checkdetail: checkdetail.rows });
@@ -211,7 +230,6 @@ async function transferDetailSingle(
     temp.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp.amount = Math.ceil(temp.subtotal + temp.taxAmount);
-
     const updateDetail = await pool.query(
       `
         UPDATE checkdetail SET quantity = $1, subtotal = $2, taxamount = $3, amount = $4 WHERE id = $5;
@@ -227,12 +245,10 @@ async function transferDetailSingle(
 
     //for insert/transfer to the new check
     var temp1 = currentDetail;
-    temp1.quantity = transferDetail.quantity;
-    temp1.quantity.toFixed(3);
+    temp1.quantity = transferDetail.quantity.toFixed(3);
     temp1.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp1.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp1.amount = Math.ceil(temp.subtotal + temp.taxAmount);
-
     const transfer = await pool.query(
       `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,status,starttime,isreminded) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,false) RETURNING id`,
       [
@@ -324,6 +340,10 @@ async function updateCheckInfo(idCheck1, idCheck2, req) {
       `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
       [req.session.user.id, idCheck1]
     );
+    const updateCheckTo = await pool.query(
+      `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+      [req.session.user.id, idCheck2]
+    );
   } catch (error) {
     console.log(error);
   }
@@ -366,15 +386,11 @@ router.put(
         );
 
         transferDetail.itemid = currentDetail.rows[0].itemid;
+
         if (currentDetail.rows[0].quantity <= transferDetail.quantity) {
           await transferDetailInFull(
             secondTableCheck.rows[0].id,
             currentDetail.rows[0].id
-          );
-          await updateCheckInfo(
-            firstTableCheck.rows[0].id,
-            secondTableCheck.rows[0].id,
-            req
           );
         } else {
           await transferDetailSingle(
@@ -384,13 +400,13 @@ router.put(
             tax.rows[0].taxvalue,
             req
           );
-          await updateCheckInfo(
-            firstTableCheck.rows[0].id,
-            secondTableCheck.rows[0].id,
-            req
-          );
         }
       }
+      await updateCheckInfo(
+        firstTableCheck.rows[0].id,
+        secondTableCheck.rows[0].id,
+        req
+      );
       await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
       await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
       res.status(200).json({ msg: 'Món đã được tách' });
@@ -416,6 +432,7 @@ async function transferPercent(
     temp.quantity = (temp.quantity - temp.quantity * (percent / 100)).toFixed(
       3
     );
+    temp.completedquanitity = temp.quantity;
     temp.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp.amount = Math.ceil(temp.subtotal + temp.taxAmount);
@@ -433,7 +450,8 @@ async function transferPercent(
       ]
     );
 
-    temp.quantity = (temp.quantity * (percent / 100)).toFixed(3);
+    temp.quantity = (retainValue * (percent / 100)).toFixed(3);
+    temp.completedquanitity = temp.quantity;
     temp.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp.amount = Math.ceil(temp.subtotal + temp.taxAmount);
@@ -472,6 +490,7 @@ async function transferPercent(
 router.put(
   '/transfer/percent',
   isCheckActiveForTransfer,
+  isAllItemServed,
   isSecondTableInUse,
   async (req, res) => {
     try {
@@ -506,11 +525,6 @@ router.put(
             secondTableCheck.rows[0].id,
             detaillist[i].id
           );
-          await updateCheckInfo(
-            firstTableCheck.rows[0].id,
-            secondTableCheck.rows[0].id,
-            req
-          );
         } else {
           await transferPercent(
             detaillist[i],
@@ -519,13 +533,13 @@ router.put(
             secondTableCheck.rows[0].id,
             req
           );
-          await updateCheckInfo(
-            firstTableCheck.rows[0].id,
-            secondTableCheck.rows[0].id,
-            req
-          );
         }
       }
+      await updateCheckInfo(
+        firstTableCheck.rows[0].id,
+        secondTableCheck.rows[0].id,
+        req
+      );
       await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
       await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
       res.status(200).json({ msg: 'Món đã được tách' });

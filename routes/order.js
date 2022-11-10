@@ -719,13 +719,13 @@ router.put('/detail/:id/served', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const getdetailstatus = await pool.query(
-      'SELECT status FROM checkdetail WHERE id = $1',
+    const getdetail = await pool.query(
+      'SELECT quantity, status FROM checkdetail WHERE id = $1',
       [id]
     );
 
-    if (getdetailstatus.rows[0]) {
-      if (getdetailstatus.rows[0].status == sob.READY) {
+    if (getdetail.rows[0]) {
+      if (getdetail.rows[0].status == sob.READY) {
         const updateCheckDetail = await pool.query(
           `UPDATE checkdetail SET status = 'SERVED' WHERE id = $1`,
           [id]
@@ -743,7 +743,6 @@ router.put('/detail/:id/served', async (req, res) => {
           [id]
         );
         await overViewUpdate(updatelocation.rows[0].id, req, res);
-
         res.status(200).json();
       } else {
         res.status(400).json({ msg: 'Món chưa hoàn tất!' });

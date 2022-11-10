@@ -61,14 +61,22 @@ async function massViewUpdate(currentLocationId, req, res) {
   }
 }
 
-async function hasCheckBeenRefund(req, res, next) {
+async function hasBillBeenRefund(req, res, next) {
   try {
-    const { checkid } = req.body;
+    const { billid } = req.body;
+
+    const bill = await pool.query(
+      `SELECT checkid FROM bill WHERE id = $1 and status = 'CLOSED' LIMIT 1
+      `,
+      [billid]
+    );
+
     const getBill = await pool.query(
       `SELECT id FROM bill WHERE checkid = $1 and status = 'REFUND' LIMIT 1
       `,
-      [checkid]
+      [bill.rows[0].checkid]
     );
+
     if (getBill.rows[0]) {
       res.status(400).json({ msg: 'Hóa đơn này đã được hoàn tiền!' });
     } else {
@@ -262,9 +270,10 @@ router.get('/check/:id/refund', async (req, res) => {
   }
 });
 
-router.post('/check/refund', hasCheckBeenRefund, async (req, res) => {
+//updatehere
+router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
   try {
-    const { checkid } = req.body;
+    const { billid } = req.body;
     const billno = await helpers.billNoString();
     const validate = await pool.query(
       'SELECT id FROM "bill" WHERE billno = $1',
@@ -275,42 +284,42 @@ router.post('/check/refund', hasCheckBeenRefund, async (req, res) => {
         msg: 'Lỗi hệ thống: Xin liên hệ quản trị viên để giải quyết lỗi.',
       });
     } else {
-      const getCheck = await pool.query(
+      const getBill = await pool.query(
         `
-    SELECT id AS checkid, guestname,(subtotal * -1) AS subtotal,(totaltax * -1) AS totaltax,(totalamount * -1) AS totalamount, note
-    FROM "check"
+    SELECT id, checkid, guestname,(subtotal * -1) AS subtotal,(totaltax * -1) AS totaltax,(totalamount * -1) AS totalamount, note
+    FROM "bill"
     WHERE id = $1 and status = 'CLOSED';
     `,
-        [checkid]
+        [billid]
       );
-      if (!getCheck.rows[0]) {
+      if (!getBill.rows[0]) {
         res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
       } else {
         const createBill = await pool.query(
           `
-      INSERT INTO "bill"(checkid,billno,guestname,subtotal,totaltax,totalamount,note,creatorId,creationTime, status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP, 'REFUND') RETURNING id
-    `,
+              INSERT INTO "bill"(checkid,billno,guestname,subtotal,totaltax,totalamount,note,creatorId,creationTime, status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP, 'REFUND') RETURNING id
+          `,
           [
-            getCheck.rows[0].checkid,
+            getBill.rows[0].checkid,
             billno,
-            getCheck.rows[0].guestname,
-            getCheck.rows[0].subtotal,
-            getCheck.rows[0].totaltax,
-            getCheck.rows[0].totalamount,
-            getCheck.rows[0].note,
+            getBill.rows[0].guestname,
+            getBill.rows[0].subtotal,
+            getBill.rows[0].totaltax,
+            getBill.rows[0].totalamount,
+            getBill.rows[0].note,
             req.session.user.id,
           ]
         );
         if (createBill.rows[0]) {
           const paymentlist = await pool.query(
             `
-      SELECT BP.paymentmethodid AS id, BP.paymentmethodname AS name, (BP.amountreceive * -1) AS amount
-      FROM "billpayment" AS BP
-      JOIN bill AS B
-      ON B.id = BP.billid
-      WHERE B.checkid = $1;
-      `,
-            [checkid]
+            SELECT BP.paymentmethodid AS id, BP.paymentmethodname AS name, (BP.amountreceive * -1) AS amount
+            FROM "billpayment" AS BP
+            JOIN bill AS B
+            ON B.id = BP.billid
+            WHERE B.id = $1 AND B.status = 'CLOSED' LIMIT 1;
+            `,
+            [billid]
           );
 
           //insert payment method
@@ -328,13 +337,11 @@ router.post('/check/refund', hasCheckBeenRefund, async (req, res) => {
             );
           }
 
-          const checkdetail = await pool.query(
-            `SELECT D.id, I.name AS itemname, D.itemid,D.itemprice, D.quantity, (D.subtotal * -1) AS subtotal, (D.taxamount *-1) AS taxamount, (D.amount * -1) AS amount
-          FROM "checkdetail" AS D
-          JOIN "item" AS I
-          ON D.itemid = I.id
-          WHERE D.status != 'VOID' AND D.status = 'SERVED' AND D.checkid = $1`,
-            [checkid]
+          const billdetail = await pool.query(
+            `SELECT id, itemid, itemname, itemprice, quantity,(subtotal * -1),(taxamount * -1),(amount * -1)
+            FROM billdetail
+            WHERE billid = $1`,
+            [billid]
           );
           const detaillist = await helpers.printBillDetailList(
             checkdetail.rows
@@ -347,16 +354,22 @@ router.post('/check/refund', hasCheckBeenRefund, async (req, res) => {
           `,
               [
                 createBill.rows[0].id,
-                detaillist[x].itemid,
-                detaillist[x].itemname,
-                detaillist[x].itemprice,
-                detaillist[x].quantity,
-                detaillist[x].subtotal,
-                detaillist[x].taxamount,
-                detaillist[x].amount,
+                billdetail[x].itemid,
+                billdetail[x].itemname,
+                billdetail[x].itemprice,
+                billdetail[x].quantity,
+                billdetail[x].subtotal,
+                billdetail[x].taxamount,
+                billdetail[x].amount,
               ]
             );
           }
+
+          const updateCheck = await pool.query(
+            `UPDATE "check" SET updaterId = $1, updateTime = CURRENT_TIMESTAMP WHERE id = $2`,
+            [req.session.user.id, getBill.rows[0].checkid]
+          );
+
           res.status(200).json({ msg: 'Hoàn tiền thành công' });
         } else {
           res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
