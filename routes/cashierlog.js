@@ -52,7 +52,7 @@ router.get('/:id', async (req, res) => {
       [id]
     );
     if (amount.rows[0]) {
-      res.status(200).json({ amount: amount.rows[0] });
+      res.status(200).json(amount.rows[0]);
     } else {
       res.status(400).json({ msg: 'Không tim thấy thông tin!' });
     }
