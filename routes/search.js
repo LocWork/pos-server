@@ -29,6 +29,8 @@ router.get(`/checklist`, async (req, res) => {
     ON T.id = C.tableid
     JOIN "location" AS L
     ON L.id = T.locationid
+    ORDER BY C.id
+    DESC
     ;
    `);
     res.status(200).json(checkList.rows);
@@ -49,6 +51,8 @@ router.get(`/billlist`, async (req, res) => {
     ON T.id = C.tableid
     JOIN "location" AS L
     ON L.id = T.locationid
+    ORDER BY B.id
+    DESC
    `);
     res.status(200).json(billlist.rows);
   } catch (error) {
@@ -178,7 +182,7 @@ router.get('/bill/:id/detail', async (req, res) => {
     const { id } = req.params;
 
     const billDetailList = await pool.query(
-      `SELECT id, itemname,itemprice,quantity,subtotal,taxamount,amount FROM "billdetail" WHERE billid = $1`,
+      `SELECT id, itemname,itemprice,quantity,subtotal,taxamount,amount FROM "billdetail" WHERE billid = $1 ORDER BY id ASC`,
       [id]
     );
 
@@ -194,7 +198,7 @@ router.get('/bill/:id/payment', async (req, res) => {
     const { id } = req.params;
 
     const billPaymentList = await pool.query(
-      `SELECT paymentmethodname,amountreceive FROM "billpayment" WHERE billid = $1`,
+      `SELECT paymentmethodname,amountreceive FROM "billpayment" WHERE billid = $1 ORDER BY id ASC`,
       [id]
     );
 

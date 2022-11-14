@@ -7,6 +7,9 @@ class sob {
   static NOT_USE = 'NOT_USE';
   static ACTIVE = 'ACTIVE';
   static READY = 'READY';
+  static PARTNERCODE = 'MOMODJMX20220717';
+  static ACCESSKEY = 'WehkypIRwPP14mHb';
+  static SECRETKEY = '3fq8h4CqAAPZcTTb3nCDpFKwEkQDsZzz';
 }
 
 module.exports = sob;

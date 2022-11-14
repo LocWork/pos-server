@@ -269,9 +269,9 @@ router.get('/check/:id/refund', async (req, res) => {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 });
-
+//, hasBillBeenRefund
 //updatehere
-router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
+router.post('/bill/refund', async (req, res) => {
   try {
     const { billid } = req.body;
     const billno = await helpers.billNoString();
@@ -292,6 +292,7 @@ router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
     `,
         [billid]
       );
+
       if (!getBill.rows[0]) {
         res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
       } else {
@@ -317,7 +318,7 @@ router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
             FROM "billpayment" AS BP
             JOIN bill AS B
             ON B.id = BP.billid
-            WHERE B.id = $1 AND B.status = 'CLOSED' LIMIT 1;
+            WHERE B.id = $1 AND B.status = 'CLOSED';
             `,
             [billid]
           );
@@ -343,11 +344,10 @@ router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
             WHERE billid = $1`,
             [billid]
           );
-          const detaillist = await helpers.printBillDetailList(
-            checkdetail.rows
-          );
 
-          for (var x = 0; x < detaillist.length; x++) {
+          //const detaillist = await helpers.printBillDetailList(billdetail.rows);
+
+          for (var x = 0; x < billdetail.length; x++) {
             var detail = await pool.query(
               `
             INSERT INTO billdetail(billid,itemid,itemname,itemprice,quantity,subtotal,taxamount,amount) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
