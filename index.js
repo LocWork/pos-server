@@ -78,13 +78,13 @@ io.on('connection', (socket) => {
   socket.on('join-pos-location', (room) => {
     var location = `POS-L-${room}`;
     socket.join(location);
-    console.log(`you have join pos location: ${location}`);
+    console.log(`You have join pos location: ${location}`);
   });
 
   socket.on('join-kds-location', (room) => {
     var kds = `KDS-L-${room}`;
     socket.join(kds);
-    console.log(`you have join kds location: ${kds}`);
+    console.log(`You have join kds location: ${kds}`);
   });
 });
 
@@ -105,7 +105,7 @@ app.use('/logout', logoutRoute);
 //     console.log(error);
 //     res
 //       .status(400)
-//       .json({ msg: 'Lỗi hệ thống, không thể kiểm tra người dùng!' });
+//       .json({ msg: 'Lỗi hệ thống' });
 //   }
 // }
 // app.use(checkUserSession);

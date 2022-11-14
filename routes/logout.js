@@ -48,7 +48,7 @@ router.put(`/cashierclose`, async (req, res) => {
         res.status(200).json();
       } else {
         req.session.destroy();
-        res.status(400).json({ msg: 'Không thể lưu thông tin đóng ca' });
+        res.status(400).json({ msg: 'Không thể lưu thông tin' });
       }
     } else {
       req.session.destroy();

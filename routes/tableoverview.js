@@ -37,6 +37,16 @@ async function doesTableHaveCheck(req, res, next) {
         [id]
       );
 
+      const getLocation = await pool.query(
+        `SELECT locationid AS id
+        FROM "table" 
+        WHERE id = $1
+        LIMIT 1
+        ;`,
+        [id]
+      );
+      massViewUpdate(getLocation.rows[0].id, req, res);
+
       res.status(200).json({
         checkid: tableCheck.rows[0].id,
       });
@@ -54,14 +64,14 @@ async function massViewUpdate(currentLocationId, req, res) {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-    if (req.session.locationid && req.session.locationid != 0) {
-      req.io
-        .to(`POS-L-${currentLocationId}`)
-        .emit(
-          'update-pos-tableOverview',
-          await helpers.updateTableOverview(currentLocationId)
-        );
-    }
+
+    req.io
+      .to(`POS-L-${currentLocationId}`)
+      .emit(
+        'update-pos-tableOverview',
+        await helpers.updateTableOverview(currentLocationId)
+      );
+
     req.io
       .to(`KDS-L-0`)
       .emit('update-kds-kitchen', await helpers.updateKitchen());
@@ -246,6 +256,17 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
           [id]
         );
 
+        const getLocation = await pool.query(
+          `SELECT locationid AS id
+        FROM "table" 
+        WHERE id = $1
+        LIMIT 1
+        ;`,
+          [id]
+        );
+
+        await massViewUpdate(getLocation.rows[0].id, req, res);
+
         res.status(200).json({
           checkid: createCheck.rows[0].id,
         });
@@ -359,48 +380,3 @@ router.put(
 );
 
 module.exports = router;
-
-//router.get(
-//   `/table1/:id1/table2/:id2`,
-//   isFirstTableInUse,
-//   isSecondTableInUse,
-//   async (req, res) => {
-//     try {
-//       const { id1, id2 } = req.params;
-
-//       const table1Check = await pool.query(
-//         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
-//         [id1]
-//       );
-
-//       const table2Check = await pool.query(
-//         `SELECT id FROM "check" WHERE tableId = $1 AND status = 'ACTIVE' LIMIT 1`,
-//         [id2]
-//       );
-
-//       const checkDetail = await pool.query(
-//         `
-//       SELECT D.id, I.name, D.quantity, D.amount, D.status
-//       FROM "table" AS T
-//       JOIN "check" AS C
-//       ON T.id = C.tableid
-//       JOIN checkdetail AS D
-//       ON D.checkid = C.id
-//       JOIN item AS I
-//       ON I.id = D.itemid
-//       WHERE T.status = 'IN_USE' AND C.status = 'ACTIVE' AND (D.status != 'VOID' AND D.status != 'RECALL') AND T.id = $1;
-//       `,
-//         [id1]
-//       );
-//       const table1CheckWithDetail = _.merge(table1Check.rows[0], {
-//         checkdetail: checkDetail.rows,
-//       });
-//       res
-//         .status(200)
-//         .json({ table1: table1CheckWithDetail, table2: table2Check.rows[0] });
-//     } catch (error) {
-//       console.log(error);
-//       res.status(400).json({ msg: 'Lỗi hệ thống!' });
-//     }
-//   }
-// )

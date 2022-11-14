@@ -46,6 +46,7 @@ async function massViewUpdate(id, req, res) {
 
 async function massViewUpdateList(list, req, res) {
   try {
+    console.log(list);
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));

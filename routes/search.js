@@ -121,7 +121,7 @@ router.get(`/check/:id/status`, async (req, res) => {
     if (check.rows[0]) {
       res.status(200).json(check.rows[0]);
     } else {
-      res.status(400).json({ msg: 'Không tìm thấy đơn hàng' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
     }
   } catch (error) {
     console.log(error);

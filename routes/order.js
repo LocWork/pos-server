@@ -312,7 +312,7 @@ router.put(`/check/:id/info`, async (req, res) => {
       [id]
     );
     await overViewUpdate(updatelocation.rows[0].id, req, res);
-    res.status(200).json({ msg: 'Thông tin đã được cập nhật!' });
+    res.status(200).json({ msg: 'Đã cập nhật!' });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -343,7 +343,7 @@ router.put(`/check/:id/note`, async (req, res) => {
       `UPDATE "check" SET note = $1, updaterId = $2, updateTime = CURRENT_TIMESTAMP WHERE id = $3`,
       [note, req.session.user.id, id]
     );
-    res.status(200).json({ msg: 'Đã cập nhật thông tin' });
+    res.status(200).json({ msg: 'Đã cập nhật!' });
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
@@ -366,7 +366,7 @@ router.get(`/view/item/:id`, async (req, res) => {
     if (getItems.rows[0]) {
       res.status(200).json({ item: getItems.rows[0] });
     } else {
-      res.status(400).json({ msg: 'Không tim thấy món' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
     }
   } catch (error) {
     console.log(error);
@@ -691,9 +691,7 @@ router.put(`/checkdetail/:id/void`, async (req, res) => {
       await massViewUpdate(updatelocation.rows[0].id, req, res);
       res.status(200).json();
     } else {
-      res
-        .status(400)
-        .json({ msg: 'Lỗi hệ thống: Không tìm được thông tin cần cập nhật!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
     }
   } catch (error) {
     console.log(error);
@@ -748,7 +746,7 @@ router.put('/detail/:id/served', async (req, res) => {
         res.status(400).json({ msg: 'Món chưa hoàn tất!' });
       }
     } else {
-      res.status(400).json({ msg: 'Không tìm thấy dữ liệu!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
     }
   } catch (error) {
     console.log(error);

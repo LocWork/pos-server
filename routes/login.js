@@ -223,7 +223,7 @@ router.put(`/cashieropen/:shiftid`, async (req, res) => {
         req.session.shiftId = updateShift.rows[0].id;
         res.status(200).json();
       } else {
-        res.status(400).json({ msg: 'Không thể lưu thông tin mở ca' });
+        res.status(400).json({ msg: 'Không thể lưu thông tin' });
       }
     } else {
       res.status(400).json({ msg: 'Không thể mở ca' });

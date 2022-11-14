@@ -167,7 +167,7 @@ async function isCheckActiveForTransfer(req, res, next) {
     if (checkstatus.rows[0]) {
       next();
     } else {
-      res.status(400).json({ msg: `Không thể thay đổi thông tin` });
+      res.status(400).json({ msg: `Không tìm thấy thông tin` });
     }
   } catch (error) {
     console.log(error);
