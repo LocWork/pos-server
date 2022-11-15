@@ -1,5 +1,4 @@
 const { Router } = require('express');
-const { check } = require('express-validator');
 const router = Router();
 const pool = require('../db');
 const sob = require('../staticObj');

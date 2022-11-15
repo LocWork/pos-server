@@ -2,7 +2,6 @@ const { Router } = require('express');
 const router = Router();
 const pool = require('../db');
 const sob = require('../staticObj');
-const _ = require('lodash');
 
 async function checkRoleCashier(req, res, next) {
   try {

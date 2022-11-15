@@ -3,7 +3,6 @@ const router = Router();
 const pool = require('../db');
 const sob = require('../staticObj');
 const helpers = require('../utils/helpers');
-const _ = require('lodash');
 
 async function checkRoleWaiterAndCashier(req, res, next) {
   try {

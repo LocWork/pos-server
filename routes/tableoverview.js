@@ -2,9 +2,7 @@ const { Router, query } = require('express');
 const router = Router();
 const pool = require('../db');
 const sob = require('../staticObj');
-const _ = require('lodash');
 const helpers = require('../utils/helpers');
-const { check } = require('express-validator');
 
 async function checkRoleWaiterAndCashier(req, res, next) {
   try {
@@ -45,7 +43,7 @@ async function doesTableHaveCheck(req, res, next) {
         ;`,
         [id]
       );
-      massViewUpdate(getLocation.rows[0].id, req, res);
+      await massViewUpdate(getLocation.rows[0].id, req, res);
 
       res.status(200).json({
         checkid: tableCheck.rows[0].id,

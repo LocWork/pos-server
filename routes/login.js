@@ -3,7 +3,6 @@ const router = Router();
 const pool = require('./../db');
 const helpers = require('./../utils/helpers');
 const sob = require('./.././staticObj');
-const session = require('express-session');
 
 //GET restaurant image
 router.get('/', async (req, res) => {
