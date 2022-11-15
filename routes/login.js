@@ -208,7 +208,7 @@ router.put(`/cashieropen/:shiftid`, async (req, res) => {
     const { amount } = req.body;
 
     const selectedShift = await pool.query(
-      `SELECT (endtime > CURRENT_TIMESTAMP) as result FROM "shift" WHERE id = $1`,
+      `SELECT (endtime > CURRENT_TIMESTAMP::time) as result FROM "shift" WHERE id = $1`,
       [shiftid]
     );
     if (selectedShift.rows[0].result == false) {
