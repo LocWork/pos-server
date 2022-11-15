@@ -22,7 +22,7 @@ async function checkRoleCashier(req, res, next) {
 router.get(`/checklist`, async (req, res) => {
   try {
     const checkList = await pool.query(`
-    SELECT C.id, C.creationtime::TIMESTAMP::DATE, C.checkno, T.name AS tablename, L.name AS locationname, C.totaltax, C.totalamount, C.status
+    SELECT C.id, C.creationtime::TIMESTAMP, C.checkno, T.name AS tablename, L.name AS locationname, C.totaltax, C.totalamount, C.status
     FROM "check" AS C
     JOIN "table" AS T
     ON T.id = C.tableid
@@ -42,7 +42,7 @@ router.get(`/checklist`, async (req, res) => {
 router.get(`/billlist`, async (req, res) => {
   try {
     const billlist = await pool.query(`
-    SELECT B.id, B.creationtime::TIMESTAMP::DATE, B.billno, T.name AS tablename, L.name AS locationname, B.totaltax, B.totalamount, B.status
+    SELECT B.id, B.creationtime::TIMESTAMP, B.billno, T.name AS tablename, L.name AS locationname, B.totaltax, B.totalamount, B.status
     FROM "bill" AS B 
     JOIN "check" AS C
     ON B.checkid = C.id
