@@ -206,26 +206,35 @@ router.put(`/cashieropen/:shiftid`, async (req, res) => {
   try {
     const { shiftid } = req.params;
     const { amount } = req.body;
-    const updateShift = await pool.query(
-      `UPDATE "shift" SET isOpen = true, openerid = $1 WHERE id = $2 AND status = 'ACTIVE' returning id`,
-      [req.session.user.id, shiftid]
-    );
 
-    if (updateShift.rows[0]) {
-      const open = await pool.query(
-        `
+    const selectedShift = await pool.query(
+      `SELECT (endtime > CURRENT_TIMESTAMP) as result FROM "shift" WHERE id = $1`,
+      [shiftid]
+    );
+    if (selectedShift.rows[0].result == false) {
+      res.status(400).json({ msg: 'Không thể mở ca' });
+    } else {
+      const updateShift = await pool.query(
+        `UPDATE "shift" SET isOpen = true, openerid = $1 WHERE id = $2 AND status = 'ACTIVE' returning id`,
+        [req.session.user.id, shiftid]
+      );
+
+      if (updateShift.rows[0]) {
+        const open = await pool.query(
+          `
       INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount) VALUES($1,$2,NOW()::timestamp,'OPEN',$3) RETURNING id
       `,
-        [req.session.user.id, updateShift.rows[0].id, amount]
-      );
-      if (open.rows[0]) {
-        req.session.shiftId = updateShift.rows[0].id;
-        res.status(200).json();
+          [req.session.user.id, updateShift.rows[0].id, amount]
+        );
+        if (open.rows[0]) {
+          req.session.shiftId = updateShift.rows[0].id;
+          res.status(200).json();
+        } else {
+          res.status(400).json({ msg: 'Không thể lưu thông tin' });
+        }
       } else {
-        res.status(400).json({ msg: 'Không thể lưu thông tin' });
+        res.status(400).json({ msg: 'Không thể mở ca' });
       }
-    } else {
-      res.status(400).json({ msg: 'Không thể mở ca' });
     }
   } catch (error) {
     console.log(error);
