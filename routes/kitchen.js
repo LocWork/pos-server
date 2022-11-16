@@ -179,7 +179,7 @@ router.get('/menu/:id/instock', async (req, res) => {
       FROM menu AS M
       JOIN menuitem AS MI
       ON MI.menuid = M.id
-      JOIN 
+      JOIN item AS I
       ON MI.itemid = I.id
       WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
       `,
