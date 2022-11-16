@@ -225,6 +225,9 @@ router.get('/check/:id', async (req, res) => {
       `,
       [id]
     );
+
+    console.log(check.rows[0].creationtime);
+
     if (check.rows[0]) {
       var checkInfo = [];
 
