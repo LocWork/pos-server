@@ -205,7 +205,6 @@ router.get('/menu/', async (req, res) => {
     res.status(200).json(menuList.rows);
   } catch (error) {
     console.log(error);
-    console.log('hello');
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 });
