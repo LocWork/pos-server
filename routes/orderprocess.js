@@ -70,16 +70,19 @@ async function hasBillBeenRefund(req, res, next) {
       [billid]
     );
 
-    const getBill = await pool.query(
-      `SELECT id FROM bill WHERE checkid = $1 and status = 'REFUND' LIMIT 1
+    if (bill.rows[0]) {
+      const getBill = await pool.query(
+        `SELECT id FROM bill WHERE checkid = $1 and status = 'REFUND' LIMIT 1
       `,
-      [bill.rows[0].checkid]
-    );
+        [bill.rows[0].checkid]
+      );
 
-    if (getBill.rows[0]) {
-      res.status(400).json({ msg: 'Hóa đơn này đã được hoàn tiền!' });
+      if (getBill.rows[0]) {
+        res.status(400).json({ msg: 'Hóa đơn này đã được hoàn tiền!' });
+      } else {
+        next();
+      }
     } else {
-      next();
     }
   } catch (error) {
     console.log(error);
@@ -205,72 +208,9 @@ router.post('/check/process', isAllItemServed, async (req, res) => {
   }
 });
 
-//GET check and detail for refund
-router.get('/check/:id/refund', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const getCheck = await pool.query(
-      `SELECT C.id AS checkid,C.checkno,(C.subtotal * -1) AS subtotal,(C.totalTax * -1) AS totaltax, (C.totalamount * -1) AS totalamount, C.creationtime::time(0)
-      FROM "check" AS C
-      JOIN "table" AS T
-      ON C.tableid = T.id
-      WHERE C.status = 'CLOSED' AND C.id = $1
-      LIMIT 1;
-      `,
-      [id]
-    );
-
-    var checkInfo = [];
-
-    for (var i = 0; i < getCheck.rows.length; i++) {
-      var checkDetailList = await pool.query(
-        `
-       SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, (D.amount * -1) AS amount
-       FROM "check" AS C
- 	     JOIN checkdetail AS D
-       ON C.id = D.checkid
-       JOIN item AS I
-       ON D.itemid = I.id
-       WHERE D.status != 'VOID' AND C.id = $1
-       ORDER BY D.id ASC;
-       `,
-        [getCheck.rows[0].checkid]
-      );
-      var temp = [];
-      for (var x = 0; x < checkDetailList.rows.length; x++) {
-        var specialRequestList = await pool.query(
-          `
-          SELECT S.name
-          FROM checkdetailspecialrequest AS CSP
-          JOIN checkdetail AS D
-          ON CSP.checkdetailid = D.id
-          JOIN specialrequest AS S
-          ON CSP.specialrequestid = S.id
-          WHERE D.id = $1
-          `,
-          [checkDetailList.rows[x].checkdetailid]
-        );
-
-        temp.push(
-          _.merge(checkDetailList.rows[x], {
-            specialrequest: specialRequestList.rows,
-          })
-        );
-      }
-    }
-    checkInfo = _.merge(getCheck.rows[0], { checkdetail: temp });
-
-    res.status(200).json({
-      check: checkInfo,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-});
 //, hasBillBeenRefund
 //updatehere
-router.post('/bill/refund', async (req, res) => {
+router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
   try {
     const { billid } = req.body;
     const billno = await helpers.billNoString();
@@ -382,3 +322,67 @@ router.post('/bill/refund', async (req, res) => {
 });
 
 module.exports = router;
+
+//GET check and detail for refund
+// router.get('/check/:id/refund', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const getCheck = await pool.query(
+//       `SELECT C.id AS checkid,C.checkno,(C.subtotal * -1) AS subtotal,(C.totalTax * -1) AS totaltax, (C.totalamount * -1) AS totalamount, C.creationtime::time(0)
+//       FROM "check" AS C
+//       JOIN "table" AS T
+//       ON C.tableid = T.id
+//       WHERE C.status = 'CLOSED' AND C.id = $1
+//       LIMIT 1;
+//       `,
+//       [id]
+//     );
+
+//     var checkInfo = [];
+
+//     for (var i = 0; i < getCheck.rows.length; i++) {
+//       var checkDetailList = await pool.query(
+//         `
+//        SELECT D.id AS checkDetailId, I.name AS itemname, D.quantity, D.note, D.isReminded, (D.amount * -1) AS amount
+//        FROM "check" AS C
+//  	     JOIN checkdetail AS D
+//        ON C.id = D.checkid
+//        JOIN item AS I
+//        ON D.itemid = I.id
+//        WHERE D.status != 'VOID' AND C.id = $1
+//        ORDER BY D.id ASC;
+//        `,
+//         [getCheck.rows[0].checkid]
+//       );
+//       var temp = [];
+//       for (var x = 0; x < checkDetailList.rows.length; x++) {
+//         var specialRequestList = await pool.query(
+//           `
+//           SELECT S.name
+//           FROM checkdetailspecialrequest AS CSP
+//           JOIN checkdetail AS D
+//           ON CSP.checkdetailid = D.id
+//           JOIN specialrequest AS S
+//           ON CSP.specialrequestid = S.id
+//           WHERE D.id = $1
+//           `,
+//           [checkDetailList.rows[x].checkdetailid]
+//         );
+
+//         temp.push(
+//           _.merge(checkDetailList.rows[x], {
+//             specialrequest: specialRequestList.rows,
+//           })
+//         );
+//       }
+//     }
+//     checkInfo = _.merge(getCheck.rows[0], { checkdetail: temp });
+
+//     res.status(200).json({
+//       check: checkInfo,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({ msg: 'Lỗi hệ thống!' });
+//   }
+// });

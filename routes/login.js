@@ -87,16 +87,34 @@ async function validateUser(req, res, next) {
   }
 }
 
-async function validateWaiterAndKitchen(req, res, next) {
+async function validateKitchen(req, res, next) {
   try {
-    if (
-      req.session.user.role == sob.WAITER ||
-      req.session.user.role == sob.KITCHEN
-    ) {
+    if (req.session.user.role == sob.KITCHEN) {
       const currentShift = await pool.query(
         "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND W.workdate = CURRENT_DATE AND W.isOpen = true LIMIT 1"
       );
-      console.log(currentShift);
+      if (currentShift.rows[0]) {
+        req.session.shiftId = currentShift.rows[0].id;
+        next();
+      } else {
+        req.session.destroy();
+        res.status(400).json({ msg: 'Ca làm việc chưa mở' });
+      }
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+}
+
+async function validateWaiter(req, res, next) {
+  try {
+    if (req.session.user.role == sob.WAITER) {
+      const currentShift = await pool.query(
+        "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND W.workdate = CURRENT_DATE AND W.isOpen = true LIMIT 1"
+      );
       if (currentShift.rows[0]) {
         req.session.shiftId = currentShift.rows[0].id;
         next();
@@ -142,9 +160,9 @@ async function validateCashier(req, res, next) {
 
 //UC LOGIN
 router.post(
-  '/',
+  '/pos',
   validateUser,
-  validateWaiterAndKitchen,
+  validateWaiter,
   validateCashier,
   async (req, res) => {
     try {
@@ -165,6 +183,24 @@ router.post(
     }
   }
 );
+
+router.post('/kds', validateUser, validateKitchen, async (req, res) => {
+  try {
+    if (req.session.user) {
+      const updateUserStatus = await pool.query(
+        'Update "account" SET status = \'ONLINE\' WHERE id=$1',
+        [req.session.user.id]
+      );
+      res.status(200).json({ role: req.session.user.role });
+    } else {
+      req.session.destroy();
+      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
 
 //GET SHIFT list
 router.get(`/shift`, async (req, res) => {
