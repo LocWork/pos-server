@@ -42,7 +42,7 @@ router.get(`/checklist`, async (req, res) => {
 router.get(`/billlist`, async (req, res) => {
   try {
     const billlist = await pool.query(`
-    SELECT B.id, B.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, B.billno, T.name AS tablename, L.name AS locationname, B.totaltax, B.totalamount, B.status
+    SELECT B.id, B.creationtime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, B.billno, T.name AS tablename, L.name AS locationname, B.totaltax, B.totalamount, B.status
     FROM "bill" AS B 
     JOIN "check" AS C
     ON B.checkid = C.id
