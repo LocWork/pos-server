@@ -225,7 +225,7 @@ const printBillDetailList = async (detailList) => {
       };
       tempdetail.itemid = itemidList[x].itemid;
       tempdetail.itemname = itemidList[x].itemname;
-      tempdetail.itemprice = itemidList[x].itemprice;
+      tempdetail.itemprice = Number(itemidList[x].itemprice);
       if (tempdetail.itemprice == null) {
         tempdetail.itemprice = 0;
       }
@@ -235,11 +235,14 @@ const printBillDetailList = async (detailList) => {
       if (tempdetail.itemid != null && tempdetail.itemname != null) {
         for (var j = 0; j < detailList.length; j++) {
           if (tempdetail.itemid == detailList[j].itemid) {
-            tempdetail.quantity = tempdetail.quantity + detailList[j].quantity;
-            tempdetail.subtotal = tempdetail.subtotal + detailList[j].subtotal;
+            tempdetail.quantity =
+              tempdetail.quantity + Number(detailList[j].quantity);
+            tempdetail.subtotal =
+              tempdetail.subtotal + Number(detailList[j].subtotal);
             tempdetail.taxamount =
-              tempdetail.taxamount + detailList[j].taxamount;
-            tempdetail.amount = tempdetail.amount + detailList[j].amount;
+              tempdetail.taxamount + Number(detailList[j].taxamount);
+            tempdetail.amount =
+              tempdetail.amount + Number(detailList[j].amount);
           }
         }
         finaldetail.push(tempdetail);
