@@ -22,7 +22,7 @@ async function checkRoleCashier(req, res, next) {
 router.get(`/checklist`, async (req, res) => {
   try {
     const checkList = await pool.query(`
-    SELECT C.id, C.creationtime::TIMESTAMP, C.checkno, T.name AS tablename, L.name AS locationname, C.totaltax, C.totalamount, C.status
+    SELECT C.id, C.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, C.checkno, T.name AS tablename, L.name AS locationname, C.totaltax, C.totalamount, C.status
     FROM "check" AS C
     JOIN "table" AS T
     ON T.id = C.tableid
@@ -42,7 +42,7 @@ router.get(`/checklist`, async (req, res) => {
 router.get(`/billlist`, async (req, res) => {
   try {
     const billlist = await pool.query(`
-    SELECT B.id, B.creationtime::TIMESTAMP, B.billno, T.name AS tablename, L.name AS locationname, B.totaltax, B.totalamount, B.status
+    SELECT B.id, B.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, B.billno, T.name AS tablename, L.name AS locationname, B.totaltax, B.totalamount, B.status
     FROM "bill" AS B 
     JOIN "check" AS C
     ON B.checkid = C.id
@@ -65,7 +65,7 @@ router.get(`/check/:id`, async (req, res) => {
     const { id } = req.params;
     const check = await pool.query(
       `
-    SELECT C.id,C.creationtime::time, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
+    SELECT C.id,C.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
     FROM "check" AS C
     JOIN "table" AS T
     ON T.id = C.tableid
@@ -93,7 +93,7 @@ router.get(`/bill/:id`, async (req, res) => {
     const { id } = req.params;
     const bill = await pool.query(
       `
-    SELECT id,checkid,creationtime::time, billno, guestname, subtotal, totaltax, totalamount,note,status
+    SELECT id,checkid,creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, billno, guestname, subtotal, totaltax, totalamount,note,status
     FROM "bill"
     WHERE id = $1
    `,
@@ -135,7 +135,7 @@ router.get(`/check/:id/detail`, async (req, res) => {
     var checkInfo = [];
     var checkDetailList = await pool.query(
       `
-       SELECT D.id, I.name AS itemname, D.quantity, D.note, D.subtotal,D.taxamount, D.amount, D.status, D.completiontime
+       SELECT D.id, I.name AS itemname, D.quantity, D.note, D.subtotal,D.taxamount, D.amount, D.status
        FROM "check" AS C
  	     JOIN checkdetail AS D
        ON C.id = D.checkid

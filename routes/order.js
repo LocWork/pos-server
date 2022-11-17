@@ -214,7 +214,7 @@ router.get('/check/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const check = await pool.query(
-      `SELECT C.id AS checkid,C.checkno,C.subtotal,C.totalTax, C.totalamount, C.creationtime::timestamptz at time zone 'UTC', L.id AS locationid, T.id AS tableid
+      `SELECT C.id AS checkid,C.checkno,C.subtotal,C.totalTax, C.totalamount, C.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, L.id AS locationid, T.id AS tableid
       FROM "check" AS C
       JOIN "table" AS T
       ON C.tableid = T.id
@@ -225,8 +225,6 @@ router.get('/check/:id', async (req, res) => {
       `,
       [id]
     );
-
-    console.log(check.rows[0].creationtime);
 
     if (check.rows[0]) {
       var checkInfo = [];
