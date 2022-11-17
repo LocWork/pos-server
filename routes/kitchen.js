@@ -74,7 +74,7 @@ async function massViewUpdateList(list, req, res) {
 router.get('/', async (req, res) => {
   try {
     const checkList = await pool.query(`
-    SELECT C.id AS checkid, C.checkno, L.id AS locationid, D.runningsince::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS runningsince
+    SELECT C.id AS checkid, C.checkno, L.id AS locationid, D.runningsince at time zone 'utc' at time zone 'Asia/Bangkok' AS runningsince
     FROM "check" AS C
     JOIN (SELECT checkid,MIN(starttime) AS runningsince FROM checkdetail WHERE status = 'WAITING' GROUP BY checkid) AS D
     ON C.id = D.checkid
