@@ -93,7 +93,7 @@ router.get(`/bill/:id`, async (req, res) => {
     const { id } = req.params;
     const bill = await pool.query(
       `
-    SELECT id,checkid,creationtime::TIMESTAMP::DATE, billno, guestname, subtotal, totaltax, totalamount,note,status
+    SELECT id,checkid,creationtime::time, billno, guestname, subtotal, totaltax, totalamount,note,status
     FROM "bill"
     WHERE id = $1
    `,
