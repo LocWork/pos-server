@@ -21,7 +21,7 @@ async function checkRoleCashier(req, res, next) {
 router.get('/', async (req, res) => {
   try {
     const list =
-      await pool.query(`SELECT C.id, S.name as shiftname, A.fullname,C.creationTime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime AS creationtime,C.type, C.amount
+      await pool.query(`SELECT C.id, S.name as shiftname, A.fullname,C.creationTime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime,C.type, C.amount
      FROM cashierlog AS C
      JOIN "shift" AS S
      ON C.shiftid = S.id
