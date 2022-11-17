@@ -214,7 +214,7 @@ router.get('/check/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const check = await pool.query(
-      `SELECT C.id AS checkid,C.checkno,C.subtotal,C.totalTax, C.totalamount, C.creationtime::TIMPSTAMP, L.id AS locationid, T.id AS tableid
+      `SELECT C.id AS checkid,C.checkno,C.subtotal,C.totalTax, C.totalamount, C.creationtime::TIMESTAMP, L.id AS locationid, T.id AS tableid
       FROM "check" AS C
       JOIN "table" AS T
       ON C.tableid = T.id
