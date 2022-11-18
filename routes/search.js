@@ -60,37 +60,6 @@ router.get(`/billlist`, async (req, res) => {
   }
 });
 
-router.get('/table/checkid/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const table = await pool.query(
-      `
-      SELECT tableid from "check" WHERE id = $1
-      `,
-      [id]
-    );
-    if (table.rows[0]) {
-      const tableInfo = await pool.query(
-        `SELECT id, name as tablename, status,seat AS cover from "table" WHERE id = $1`,
-        [table.rows[0].tableid]
-      );
-      tableInfo.rows[0]['iswaiting'] = false;
-      tableInfo.rows[0]['isready'] = false;
-      tableInfo.rows[0]['isrecall'] = false;
-      if (tableInfo.rows[0]) {
-        res.status(200).json(tableInfo.rows[0]);
-      } else {
-        res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
-      }
-    } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
-  }
-});
-
 router.get(`/check/:id`, async (req, res) => {
   try {
     const { id } = req.params;
