@@ -65,7 +65,7 @@ router.get(`/check/:id`, async (req, res) => {
     const { id } = req.params;
     const check = await pool.query(
       `
-    SELECT T.id AS tableid,C.id,C.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
+    SELECT C.id,C.creationtime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
     FROM "check" AS C
     JOIN "table" AS T
     ON T.id = C.tableid

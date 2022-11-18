@@ -81,27 +81,27 @@ async function massViewUpdate(currentLocationId, req, res) {
 
 async function isFirstTableInUse(req, res, next) {
   try {
-    const { id1 } = req.params;
-    const tableStatus = await pool.query(
-      `SELECT status FROM "table" WHERE id = $1`,
+    const { id1 } = req.body;
+    const info = await pool.query(
+      `SELECT tableid, status from "check" where id = $1`,
       [id1]
     );
-    if (tableStatus.rows[0]) {
-      if (tableStatus.rows[0].status == sob.IN_USE) {
-        const tableCheck = await pool.query(
-          `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
-          [id1]
+    if (info.rows[0]) {
+      if (info.rows[0].status == sob.ACTIVE) {
+        const tableStatus = await pool.query(
+          `SELECT status FROM "table" WHERE id = $1`,
+          [info.rows[0].tableid]
         );
-        if (tableCheck.rows[0]) {
+        if (tableStatus.rows[0].status == sob.IN_USE) {
           next();
         } else {
-          res.status(400).json({ msg: 'Bàn không còn đơn!' });
+          res.status(400).json({ msg: 'Bàn không còn hoạt động!' });
         }
       } else {
-        res.status(400).json({ msg: 'Bàn hiện không hoạt động!' });
+        res.status(400).json({ msg: 'Bàn không còn đơn!' });
       }
     } else {
-      res.status(400).json({ msg: 'Không tìm được bàn!' });
+      res.status(400).json({ msg: 'Không tìm được thông tin!' });
     }
   } catch (error) {
     console.log(error);
@@ -111,7 +111,7 @@ async function isFirstTableInUse(req, res, next) {
 
 async function isSecondTableInUse(req, res, next) {
   try {
-    const { id2 } = req.params;
+    const { id2 } = req.body;
     const tableStatus = await pool.query(
       `SELECT status FROM "table" WHERE id = $1`,
       [id2]
@@ -141,7 +141,7 @@ async function isSecondTableInUse(req, res, next) {
 
 async function createCheck(req, res, next) {
   try {
-    const { id2 } = req.params;
+    const { id2 } = req.body;
     const shiftId = req.session.shiftId;
     const accountId = req.session.user.id;
     const checkno = await helpers.checkNoString(8);
@@ -281,31 +281,26 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
 //Get check detail from table;
 //Transfer table
 router.put(
-  '/transfer/table1/:id1/table2/:id2',
+  '/transfer/table/',
   isFirstTableInUse,
   isSecondTableInUse,
   async (req, res) => {
     try {
-      const { id1, id2 } = req.params;
-
-      const firstTableCheck = await pool.query(
-        `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
-        [id1]
-      );
+      const { id1, id2 } = req.body;
 
       const secondTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
         [id2]
       );
 
-      if (firstTableCheck.rows[0] && secondTableCheck.rows[0]) {
+      if (secondTableCheck.rows[0]) {
         const transferTable = await pool.query(
           `UPDATE checkdetail SET checkid = $1 WHERE checkid = $2`,
-          [secondTableCheck.rows[0].id, firstTableCheck.rows[0].id]
+          [secondTableCheck.rows[0].id, id1]
         );
         const updateCheckToVoid = await pool.query(
           `UPDATE "check" SET status = 'VOID' WHERE id = $1`,
-          [firstTableCheck.rows[0].id]
+          [id1]
         );
 
         const newCheckValue = await pool.query(
@@ -340,7 +335,7 @@ router.put(
             SET subtotal = 0, totaltax = 0,totalamount = 0,updaterid = 0,updatetime = CURRENT_TIMESTAMP 
             WHERE id = $1;
             `,
-            [firstTableCheck.rows[0].id]
+            [id1]
           );
         }
 
