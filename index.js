@@ -12,7 +12,6 @@ const logoutRoute = require('./routes/logout');
 const tableOverview = require('./routes/tableoverview');
 const orderRoute = require('./routes/order');
 const orderProcessRoute = require('./routes/orderprocess.js');
-const playRoute = require('./routes/playground');
 const searchRoute = require('./routes/search');
 const kitchenRoute = require('./routes/kitchen');
 
@@ -30,25 +29,25 @@ const KnexSessionStore = require('connect-session-knex')(session);
 
 const Knex = require('knex');
 
-// const knex = Knex({
-//   client: 'pg',
-//   connection: {
-//     host: '127.0.0.1',
-//     user: 'postgres',
-//     password: 'qwe',
-//     database: 'restaurant',
-//   },
-// });
-
 const knex = Knex({
   client: 'pg',
   connection: {
-    host: 'containers-us-west-128.railway.app',
+    host: '127.0.0.1',
     user: 'postgres',
-    password: 'YlwFv6hrsWvEXY5R21Cr',
-    database: 'railway',
+    password: 'qwe',
+    database: 'restaurant',
   },
 });
+
+// const knex = Knex({
+//   client: 'pg',
+//   connection: {
+//     host: 'containers-us-west-128.railway.app',
+//     user: 'postgres',
+//     password: 'YlwFv6hrsWvEXY5R21Cr',
+//     database: 'railway',
+//   },
+// });
 
 const store = new KnexSessionStore({
   knex,
@@ -114,7 +113,6 @@ app.use('/tableoverview', tableOverview);
 app.use('/order', orderRoute);
 app.use('/orderprocess', orderProcessRoute);
 app.use('/kitchen', kitchenRoute);
-app.use('/playground', playRoute);
 app.use('/search', searchRoute);
 app.use('/transferdetail', transferDetailRoute);
 app.use('/cashierlog', cashierlogRoute);

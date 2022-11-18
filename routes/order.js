@@ -718,7 +718,7 @@ router.put('/detail/:id/served', async (req, res) => {
     const { id } = req.params;
 
     const getdetail = await pool.query(
-      'SELECT quantity, status FROM checkdetail WHERE id = $1',
+      'SELECT status FROM checkdetail WHERE id = $1',
       [id]
     );
 
@@ -743,7 +743,7 @@ router.put('/detail/:id/served', async (req, res) => {
         await overViewUpdate(updatelocation.rows[0].id, req, res);
         res.status(200).json();
       } else {
-        res.status(400).json({ msg: 'Món chưa hoàn tất!' });
+        res.status(400).json({ msg: 'Không thể cập nhật!' });
       }
     } else {
       res.status(400).json({ msg: 'Không tìm thấy thông tin!' });

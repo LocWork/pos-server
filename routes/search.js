@@ -60,12 +60,43 @@ router.get(`/billlist`, async (req, res) => {
   }
 });
 
+router.get('/table/checkid/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const table = await pool.query(
+      `
+      SELECT tableid from "check" WHERE id = $1
+      `,
+      [id]
+    );
+    if (table.rows[0]) {
+      const tableInfo = await pool.query(
+        `SELECT id, name as tablename, status,seat AS cover from "table" WHERE id = $1`,
+        [table.rows[0].tableid]
+      );
+      tableInfo.rows[0]['iswaiting'] = false;
+      tableInfo.rows[0]['isready'] = false;
+      tableInfo.rows[0]['isrecall'] = false;
+      if (tableInfo.rows[0]) {
+        res.status(200).json(tableInfo.rows[0]);
+      } else {
+        res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
+      }
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+  }
+});
+
 router.get(`/check/:id`, async (req, res) => {
   try {
     const { id } = req.params;
     const check = await pool.query(
       `
-    SELECT C.id,C.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
+    SELECT T.id AS tableid,C.id,C.creationtime::timestamp::time at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
     FROM "check" AS C
     JOIN "table" AS T
     ON T.id = C.tableid

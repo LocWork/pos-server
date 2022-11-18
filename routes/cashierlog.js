@@ -17,7 +17,7 @@ async function checkRoleCashier(req, res, next) {
 }
 
 //router.use(checkRoleCashier);
-
+//LIST CASHIER LOG.
 router.get('/', async (req, res) => {
   try {
     const list =

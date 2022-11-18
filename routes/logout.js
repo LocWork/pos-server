@@ -37,13 +37,13 @@ router.put(`/cashierclose`, async (req, res) => {
     );
 
     if (updateShift.rows[0]) {
-      const open = await pool.query(
+      const close = await pool.query(
         `
       INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount) VALUES($1,$2,NOW()::timestamp,'CLOSED',$3) RETURNING id
       `,
         [req.session.user.id, updateShift.rows[0].id, amount]
       );
-      if (open.rows[0]) {
+      if (close.rows[0]) {
         req.session.shiftId = updateShift.rows[0].id;
         res.status(200).json();
       } else {
