@@ -28,7 +28,7 @@ async function isAllItemServed(req, res, next) {
       [checkid]
     );
     if (checkdetail.rows[0]) {
-      res.status(400).json({ msg: 'Đơn vẫn còn món chưa sử lý!' });
+      res.status(400).json({ msg: 'Đơn vẫn còn món chưa xử lý!' });
     } else {
       next();
     }

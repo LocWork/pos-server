@@ -288,6 +288,11 @@ router.put(
     try {
       const { id1, id2 } = req.body;
 
+      const info = await pool.query(
+        `SELECT tableid from "check" where id = $1`,
+        [id1]
+      );
+
       const secondTableCheck = await pool.query(
         `SELECT id FROM "check" WHERE tableid = $1 AND status = 'ACTIVE' LIMIT 1`,
         [id2]
@@ -346,7 +351,7 @@ router.put(
 
         const updateTable = await pool.query(
           `UPDATE "table" SET status ='NOT_USE' WHERE id = $1`,
-          [id1]
+          [info.rows[0].tableid]
         );
 
         const updatelocation = await pool.query(

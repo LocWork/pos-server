@@ -220,7 +220,7 @@ router.get('/check/:id', async (req, res) => {
       ON C.tableid = T.id
       JOIN "location" AS L
       ON L.id = T.locationid
-      WHERE C.status = 'ACTIVE' AND T.status = 'IN_USE' AND C.id = $1
+      WHERE C.id = $1
       LIMIT 1
       `,
       [id]
