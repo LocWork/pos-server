@@ -742,7 +742,7 @@ router.put('/detail/:id/served', async (req, res) => {
         );
         await overViewUpdate(updatelocation.rows[0].id, req, res);
         res.status(200).json();
-      } else {
+      } else {f
         res.status(400).json({ msg: 'Không thể cập nhật' });
       }
     } else {

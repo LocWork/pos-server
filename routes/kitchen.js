@@ -14,7 +14,7 @@ async function checkRoleKitchen(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -40,7 +40,7 @@ async function massViewUpdate(id, req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -66,7 +66,7 @@ async function massViewUpdateList(list, req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -195,7 +195,7 @@ router.get('/menu/:id/instock', async (req, res) => {
     res.status(200).json(getMenuItems.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -227,7 +227,7 @@ router.get('/menu/:id/outofstock', async (req, res) => {
     res.status(200).json(getMenuItems.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -250,7 +250,7 @@ router.post('/add/outofstock/', async (req, res) => {
     res.status(200).json();
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -267,7 +267,7 @@ router.delete('/remove/outofstock/', async (req, res) => {
     res.status(200).json();
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 router.get('/demo', async (req, res) => {
@@ -305,7 +305,7 @@ router.put('/notify/ready/', async (req, res) => {
     res.status(200).json();
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -339,7 +339,7 @@ router.put('/notify/recall/', async (req, res) => {
     res.status(200).json();
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 

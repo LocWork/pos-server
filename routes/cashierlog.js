@@ -53,11 +53,11 @@ router.get('/:id', async (req, res) => {
     if (amount.rows[0]) {
       res.status(200).json(amount.rows[0]);
     } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -71,10 +71,10 @@ router.put('/:id', async (req, res) => {
     `,
       [amount, req.session.user.id, id]
     );
-    res.status(200).json({ msg: 'Đã cập nhật!' });
+    res.status(200).json({ msg: 'Đã cập nhật' });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
