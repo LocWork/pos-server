@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -43,7 +43,7 @@ router.get('/session', async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -68,22 +68,20 @@ async function validateUser(req, res, next) {
           userRole != sob.WAITER &&
           userRole != sob.KITCHEN
         ) {
-          res
-            .status(400)
-            .json({ msg: 'Người dùng không được quyền vào hệ thống' });
+          res.status(400).json({ msg: 'Vai trò của người dùng không phù hợp' });
         } else {
           req.session.user = userInformation.rows[0];
           next();
         }
       } else {
-        res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai!' });
+        res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai' });
       }
     } else {
-      res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai!' });
+      res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -105,7 +103,7 @@ async function validateKitchen(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -127,7 +125,7 @@ async function validateWaiter(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -145,7 +143,7 @@ async function validateCashier(req, res, next) {
       );
       if (otherCashier.rows[0]) {
         req.session.destroy();
-        res.status(400).json({ msg: 'Đã có thu ngân đang làm việc!' });
+        res.status(400).json({ msg: 'Đã có thu ngân đang làm việc' });
       } else {
         next();
       }
@@ -154,7 +152,7 @@ async function validateCashier(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -175,11 +173,11 @@ router.post(
         res.status(200).json({ role: req.session.user.role });
       } else {
         req.session.destroy();
-        res.status(400).json({ msg: 'Lỗi hệ thống!' });
+        res.status(400).json({ msg: 'Lỗi hệ thống' });
       }
     } catch (error) {
       console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+      res.status(400).json({ msg: 'Lỗi hệ thống' });
     }
   }
 );
@@ -194,11 +192,11 @@ router.post('/kds', validateUser, validateKitchen, async (req, res) => {
       res.status(200).json({ role: req.session.user.role });
     } else {
       req.session.destroy();
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+      res.status(400).json({ msg: 'Lỗi hệ thống' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -235,7 +233,7 @@ router.get(`/shift`, async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -276,11 +274,11 @@ router.put(`/cashieropen/:shiftid`, async (req, res) => {
         }
       }
     } else {
-      res.status(400).json({ msg: 'Không thể mở ca!' });
+      res.status(400).json({ msg: 'Không thể mở ca' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 

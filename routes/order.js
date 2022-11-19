@@ -17,7 +17,7 @@ async function checkRoleWaiterAndCashier(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -33,11 +33,11 @@ async function isCheckActiveToVoid(req, res, next) {
     if (check.rows[0]) {
       next();
     } else {
-      res.status(400).json({ msg: 'Không thể cập nhật đơn!' });
+      res.status(400).json({ msg: 'Không thể cập nhật' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 async function isCheckActive(req, res, next) {
@@ -50,11 +50,11 @@ async function isCheckActive(req, res, next) {
     if (check.rows[0]) {
       next();
     } else {
-      res.status(400).json({ msg: 'Không thể cập nhật đơn!' });
+      res.status(400).json({ msg: 'Không thể cập nhật ' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -76,7 +76,7 @@ async function massViewUpdate(currentLocationId, req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -94,7 +94,7 @@ async function overViewUpdate(currentLocationId, req, res) {
       );
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -105,7 +105,7 @@ async function kitchenUpdate(req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -131,11 +131,11 @@ async function isAllItemInStock(req, res, next) {
     if (flag) {
       next();
     } else {
-      res.status(400).json({ msg: `Món ${name} đã hết hàng.` });
+      res.status(400).json({ msg: `Món ${name} đã hết hàng` });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -152,7 +152,7 @@ router.get('/voidreason/', async (req, res) => {
     res.status(200).json(voidReasonList.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -169,7 +169,7 @@ router.get('/taxvalue/', async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -187,7 +187,7 @@ router.get('/majorgroup/', async (req, res) => {
     res.status(200).json(majorGroupList.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -205,7 +205,7 @@ router.get('/menu/', async (req, res) => {
     res.status(200).json(menuList.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -268,7 +268,7 @@ router.get('/check/:id', async (req, res) => {
       checkInfo = _.merge(check.rows[0], { checkdetail: temp });
       res.status(200).json({ check: checkInfo });
     } else {
-      res.status(400).json({ msg: 'Không thể tìm được check!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
     }
   } catch (error) {
     console.log(error);
@@ -366,7 +366,7 @@ router.get(`/view/item/:id`, async (req, res) => {
     if (getItems.rows[0]) {
       res.status(200).json({ item: getItems.rows[0] });
     } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
     }
   } catch (error) {
     console.log(error);
@@ -470,7 +470,7 @@ router.post('/check/add', isCheckActive, isAllItemInStock, async (req, res) => {
     res.status(200).json();
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -502,7 +502,7 @@ router.get('/menu/:id', async (req, res) => {
     res.status(200).json(getMenuItems.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -537,7 +537,7 @@ router.get('/majorgroup/:id', async (req, res) => {
     res.status(200).json(getMenuItems.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -553,7 +553,7 @@ router.put('/detail/:id/remind', async (req, res) => {
     res.status(200).json();
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -626,7 +626,7 @@ router.put(`/check/:id/void`, isCheckActiveToVoid, async (req, res) => {
     res.status(200).json({ msg: 'Đã hủy đơn' });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -691,11 +691,11 @@ router.put(`/checkdetail/:id/void`, async (req, res) => {
       await massViewUpdate(updatelocation.rows[0].id, req, res);
       res.status(200).json();
     } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -708,7 +708,7 @@ router.get('/paymentmethod', async (req, res) => {
     res.status(200).json(list.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -743,14 +743,14 @@ router.put('/detail/:id/served', async (req, res) => {
         await overViewUpdate(updatelocation.rows[0].id, req, res);
         res.status(200).json();
       } else {
-        res.status(400).json({ msg: 'Không thể cập nhật!' });
+        res.status(400).json({ msg: 'Không thể cập nhật' });
       }
     } else {
-      res.status(400).json({ msg: 'Không tìm thấy thông tin!' });
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 

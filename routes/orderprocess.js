@@ -14,7 +14,7 @@ async function checkRoleCashier(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -28,13 +28,13 @@ async function isAllItemServed(req, res, next) {
       [checkid]
     );
     if (checkdetail.rows[0]) {
-      res.status(400).json({ msg: 'Đơn vẫn còn món chưa xử lý!' });
+      res.status(400).json({ msg: 'Đơn vẫn còn món chưa xử lý' });
     } else {
       next();
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -55,14 +55,14 @@ async function isPaymentInFull(req, res, next) {
       if (check.rows[0].totalamount == paymentAmount) {
         next();
       } else {
-        res.status(400).json({ msg: 'Số tiền nhận không phù hợp!' });
+        res.status(400).json({ msg: 'Số tiền nhận không phù hợp' });
       }
     } else {
-      res.status(400).json({ msg: 'Lỗi: Thông tin của đơn đã cập nhật!' });
+      res.status(400).json({ msg: 'Không thể cập nhật' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -84,7 +84,7 @@ async function massViewUpdate(currentLocationId, req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -106,7 +106,7 @@ async function hasBillBeenRefund(req, res, next) {
       );
 
       if (getBill.rows[0]) {
-        res.status(400).json({ msg: 'Hóa đơn này đã được hoàn tiền!' });
+        res.status(400).json({ msg: 'Hóa đơn hoàn tiền đã tồn tại' });
       } else {
         next();
       }
@@ -114,7 +114,7 @@ async function hasBillBeenRefund(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -132,7 +132,7 @@ router.post(
       );
       if (validate.rows[0]) {
         res.status(400).json({
-          msg: 'Lỗi hệ thống: Xin liên hệ quản trị viên để giải quyết lỗi.',
+          msg: 'Lỗi hệ thống',
         });
       } else {
         const getCheck = await pool.query(
@@ -146,7 +146,7 @@ router.post(
           [checkid]
         );
         if (!getCheck.rows[0]) {
-          res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
+          res.status(400).json({ msg: 'Không tìm thấy thông tin' });
         } else {
           const createBill = await pool.query(
             `
@@ -236,7 +236,7 @@ router.post(
       }
     } catch (error) {
       console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+      res.status(400).json({ msg: 'Lỗi hệ thống' });
     }
   }
 );
@@ -253,7 +253,7 @@ router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
     );
     if (validate.rows[0]) {
       res.status(400).json({
-        msg: 'Lỗi hệ thống: Xin liên hệ quản trị viên để giải quyết lỗi.',
+        msg: 'Lỗi hệ thống',
       });
     } else {
       const getBill = await pool.query(
@@ -266,7 +266,7 @@ router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
       );
 
       if (!getBill.rows[0]) {
-        res.status(400).json({ msg: 'Không thể xử lý hóa đơn' });
+        res.status(400).json({ msg: 'Không tìm thấy thông tin' });
       } else {
         const createBill = await pool.query(
           `

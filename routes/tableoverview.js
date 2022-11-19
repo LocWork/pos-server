@@ -16,7 +16,7 @@ async function checkRoleWaiterAndCashier(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -53,7 +53,7 @@ async function doesTableHaveCheck(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -75,7 +75,7 @@ async function massViewUpdate(currentLocationId, req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -95,17 +95,17 @@ async function isFirstTableInUse(req, res, next) {
         if (tableStatus.rows[0].status == sob.IN_USE) {
           next();
         } else {
-          res.status(400).json({ msg: 'Bàn không còn hoạt động!' });
+          res.status(400).json({ msg: 'Bàn không còn hoạt động' });
         }
       } else {
-        res.status(400).json({ msg: 'Bàn không còn đơn!' });
+        res.status(400).json({ msg: 'Bàn không còn đơn' });
       }
     } else {
-      res.status(400).json({ msg: 'Không tìm được thông tin!' });
+      res.status(400).json({ msg: 'Không tìm được thông tin' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -131,11 +131,11 @@ async function isSecondTableInUse(req, res, next) {
         await createCheck(req, res, next);
       }
     } else {
-      res.status(400).json({ msg: 'Không tìm được bàn!' });
+      res.status(400).json({ msg: 'Không tìm được thông tin' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -160,7 +160,7 @@ async function createCheck(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -173,7 +173,7 @@ router.get('/', async (req, res) => {
     res.status(200).json(list.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -224,7 +224,7 @@ router.get('/location/:id', async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -241,7 +241,7 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
     );
     if (validate.rows[0]) {
       res.status(400).json({
-        msg: 'Lỗi hệ thống: Xin liên hệ quản trị viên để giải quyết lỗi.',
+        msg: 'Lỗi hệ thống',
       });
     } else {
       const createCheck = await pool.query(
@@ -274,7 +274,7 @@ router.put('/open/table/:id', doesTableHaveCheck, async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -366,13 +366,13 @@ router.put(
         );
 
         await massViewUpdate(updatelocation.rows[0].id, req, res);
-        res.status(200).json('Chuyển bàn thành công!');
+        res.status(200).json('Chuyển bàn thành công');
       } else {
-        res.status(400).json('Không thể chuyển bàn!');
+        res.status(400).json('Không thể chuyển bàn');
       }
     } catch (error) {
       console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+      res.status(400).json({ msg: 'Lỗi hệ thống' });
     }
   }
 );

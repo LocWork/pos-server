@@ -58,7 +58,7 @@ async function massViewUpdate(currentLocationId, req, res) {
       .emit('update-kds-kitchen', await helpers.updateKitchen());
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -72,7 +72,7 @@ async function overviewUpdate(currentLocationId, req, res) {
       );
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -97,7 +97,7 @@ async function createCheck(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -123,11 +123,11 @@ async function isSecondTableInUse(req, res, next) {
         await createCheck(req, res, next);
       }
     } else {
-      res.status(400).json({ msg: 'Không tìm được bàn!' });
+      res.status(400).json({ msg: 'Không tìm được bàn' });
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -148,11 +148,11 @@ async function canItemTransfer(req, res, next) {
     if (flag) {
       next();
     } else {
-      res.status(400).json('Không thể tách đơn do thông tin thay đổi');
+      res.status(400).json('Không thể tách đơn');
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -170,7 +170,7 @@ async function isCheckActiveForTransfer(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -198,7 +198,7 @@ router.get('/check/:id', async (req, res) => {
       .json({ taxvalue: taxValue.rows[0], checkdetail: checkdetail.rows });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -416,7 +416,7 @@ router.put(
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+      res.status(400).json({ msg: 'Lỗi hệ thống' });
     }
   }
 );
@@ -554,7 +554,7 @@ router.put(
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);
-      res.status(400).json({ msg: 'Lỗi hệ thống!' });
+      res.status(400).json({ msg: 'Lỗi hệ thống' });
     }
   }
 );

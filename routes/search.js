@@ -13,7 +13,7 @@ async function checkRoleCashier(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 }
 
@@ -35,7 +35,7 @@ router.get(`/checklist`, async (req, res) => {
     res.status(200).json(checkList.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -56,7 +56,7 @@ router.get(`/billlist`, async (req, res) => {
     res.status(200).json(billlist.rows);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -84,7 +84,7 @@ router.get(`/check/:id`, async (req, res) => {
     res.status(200).json(check.rows[0]);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -102,7 +102,7 @@ router.get(`/bill/:id`, async (req, res) => {
     res.status(200).json(bill.rows[0]);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -124,7 +124,7 @@ router.get(`/check/:id/status`, async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -172,7 +172,7 @@ router.get(`/check/:id/detail`, async (req, res) => {
     res.status(200).json({ checkdetail: checkDetailList.rows });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -188,7 +188,7 @@ router.get('/bill/:id/detail', async (req, res) => {
     res.status(200).json({ billdetail: billDetailList.rows });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
@@ -204,7 +204,7 @@ router.get('/bill/:id/payment', async (req, res) => {
     res.status(200).json({ paymentdetail: billPaymentList.rows });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống!' });
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
 
