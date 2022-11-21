@@ -311,28 +311,25 @@ router.post('/bill/refund', hasBillBeenRefund, async (req, res) => {
           }
 
           const billdetail = await pool.query(
-            `SELECT id, itemid, itemname, itemprice, quantity,(subtotal * -1),(taxamount * -1),(amount * -1)
+            `SELECT id, itemid, itemname, itemprice, quantity,(subtotal * -1) AS subtotal,(taxamount * -1) AS taxamount,(amount * -1) AS amount
             FROM billdetail
             WHERE billid = $1`,
             [billid]
           );
-
-          //const detaillist = await helpers.printBillDetailList(billdetail.rows);
-
-          for (var x = 0; x < billdetail.length; x++) {
+          for (var x = 0; x < billdetail.rows.length; x++) {
             var detail = await pool.query(
               `
             INSERT INTO billdetail(billid,itemid,itemname,itemprice,quantity,subtotal,taxamount,amount) VALUES($1,$2,$3,$4,$5,$6,$7,$8)
           `,
               [
                 createBill.rows[0].id,
-                billdetail[x].itemid,
-                billdetail[x].itemname,
-                billdetail[x].itemprice,
-                billdetail[x].quantity,
-                billdetail[x].subtotal,
-                billdetail[x].taxamount,
-                billdetail[x].amount,
+                billdetail.rows[x].itemid,
+                billdetail.rows[x].itemname,
+                billdetail.rows[x].itemprice,
+                billdetail.rows[x].quantity,
+                billdetail.rows[x].subtotal,
+                billdetail.rows[x].taxamount,
+                billdetail.rows[x].amount,
               ]
             );
           }
