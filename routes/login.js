@@ -47,7 +47,7 @@ router.get('/session', async (req, res) => {
   }
 });
 
-async function validateUser(req, res, next) {
+async function validateUserKitchen(req, res, next) {
   try {
     const { username, password } = req.body;
     const userInformation = await pool.query(
@@ -63,11 +63,41 @@ async function validateUser(req, res, next) {
       ) {
         //Determine the user role;
         const userRole = userInformation.rows[0].role;
-        if (
-          userRole != sob.CASHIER &&
-          userRole != sob.WAITER &&
-          userRole != sob.KITCHEN
-        ) {
+        if (userRole != sob.KITCHEN) {
+          res.status(400).json({ msg: 'Vai trò của người dùng không phù hợp' });
+        } else {
+          req.session.user = userInformation.rows[0];
+          next();
+        }
+      } else {
+        res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai' });
+      }
+    } else {
+      res.status(400).json({ msg: 'Tên đăng nhập hoặc mật khẩu sai' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+}
+
+async function validateUserWaiterCashier(req, res, next) {
+  try {
+    const { username, password } = req.body;
+    const userInformation = await pool.query(
+      'SELECT A.id, A.username, A.password, A.fullname,R.name AS role FROM "account" AS A JOIN "role" AS R ON A.roleid = R.id WHERE A.username = $1 LIMIT 1',
+      [username]
+    );
+    if (userInformation.rows[0]) {
+      if (
+        await helpers.validatePassword(
+          password,
+          userInformation.rows[0].password
+        )
+      ) {
+        //Determine the user role;
+        const userRole = userInformation.rows[0].role;
+        if (userRole != sob.CASHIER && userRole != sob.WAITER) {
           res.status(400).json({ msg: 'Vai trò của người dùng không phù hợp' });
         } else {
           req.session.user = userInformation.rows[0];
@@ -159,7 +189,7 @@ async function validateCashier(req, res, next) {
 //UC LOGIN
 router.post(
   '/pos',
-  validateUser,
+  validateUserWaiterCashier,
   validateWaiter,
   validateCashier,
   async (req, res) => {
@@ -182,7 +212,7 @@ router.post(
   }
 );
 
-router.post('/kds', validateUser, validateKitchen, async (req, res) => {
+router.post('/kds', validateUserKitchen, validateKitchen, async (req, res) => {
   try {
     if (req.session.user) {
       const updateUserStatus = await pool.query(
