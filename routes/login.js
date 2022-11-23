@@ -239,16 +239,16 @@ router.get(`/shift`, async (req, res) => {
     JOIN worksession AS W 
     ON S.worksessionid = W.id 
     WHERE W.isopen = true AND W.workdate = CURRENT_DATE AND 
-	((NOW()::time <= S.starttime) OR (NOW()::time >= S.starttime AND NOW()::time < S.endtime)) 
-	AND (S.starttime >= COALESCE(
+	  ((NOW()::time <= S.starttime) OR (NOW()::time >= S.starttime AND NOW()::time < S.endtime)) 
+	  AND (S.starttime >= COALESCE(
 		(SELECT MAX(S1.endtime) as time FROM "shift" AS S1 
-		 JOIN worksession AS W1 
-    	 ON S1.worksessionid = W1.id 
-		 WHERE S1.openerid IS NOT NULL
-		 AND W1.workdate = CURRENT_DATE
-		 AND W1.isopen = true
-		 GROUP BY S1.endtime
-		 ORDER BY S1.endtime DESC LIMIT 1),'00:00:00')
+		JOIN worksession AS W1 
+    ON S1.worksessionid = W1.id 
+		WHERE S1.openerid IS NOT NULL
+		AND W1.workdate = CURRENT_DATE
+		AND W1.isopen = true
+		GROUP BY S1.endtime
+		ORDER BY S1.endtime DESC LIMIT 1),'00:00:00')
 		)
     AND S.openerid IS NULL AND S.status = 'ACTIVE' AND S.isopen = false
     ORDER BY
@@ -273,10 +273,9 @@ router.put(`/cashieropen/:shiftid`, async (req, res) => {
     const { amount } = req.body;
 
     const selectedShift = await pool.query(
-      `SELECT (endtime > CURRENT_TIMESTAMP::time) as result FROM "shift" WHERE id = $1`,
+      `SELECT (endtime > CURRENT_TIMESTAMP::time at time zone 'utc' at time zone 'Asia/Bangkok') as result FROM "shift" WHERE id = $1`,
       [shiftid]
     );
-
     if (selectedShift.rows[0]) {
       if (selectedShift.rows[0].result == false) {
         res.status(400).json({ msg: 'Không thể mở ca' });

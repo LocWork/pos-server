@@ -17,7 +17,7 @@ async function checkRoleCashier(req, res, next) {
   }
 }
 
-// router.use(checkRoleCashier);
+router.use(checkRoleCashier);
 
 router.get(`/checklist`, async (req, res) => {
   try {

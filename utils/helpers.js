@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs');
-const randomstring = require('randomstring');
 const _ = require('lodash');
 const pool = require('../db');
 

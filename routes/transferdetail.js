@@ -20,7 +20,7 @@ async function checkRoleWaiterAndCashier(req, res, next) {
   }
 }
 
-//router.use(checkRoleWaiterAndCashier);
+router.use(checkRoleWaiterAndCashier);
 
 async function isAllItemServed(req, res, next) {
   try {

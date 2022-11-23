@@ -18,7 +18,7 @@ async function checkRoleCashier(req, res, next) {
   }
 }
 
-//router.use(checkRoleCashier);
+router.use(checkRoleCashier);
 
 async function isAllItemServed(req, res, next) {
   try {

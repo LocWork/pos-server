@@ -21,7 +21,7 @@ async function checkRoleWaiterAndCashier(req, res, next) {
   }
 }
 
-//router.use(checkRoleWaiterAndCashier);
+router.use(checkRoleWaiterAndCashier);
 
 async function isCheckActiveToVoid(req, res, next) {
   try {
@@ -742,7 +742,8 @@ router.put('/detail/:id/served', async (req, res) => {
         );
         await overViewUpdate(updatelocation.rows[0].id, req, res);
         res.status(200).json();
-      } else {f
+      } else {
+        f;
         res.status(400).json({ msg: 'Không thể cập nhật' });
       }
     } else {

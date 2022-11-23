@@ -1,7 +1,6 @@
 const { Router } = require('express');
 const router = Router();
 const pool = require('./../db');
-const sob = require('./.././staticObj');
 
 async function checkSession(req, res, next) {
   try {

@@ -1,4 +1,4 @@
-const { Router, query } = require('express');
+const { Router } = require('express');
 const router = Router();
 const pool = require('../db');
 const sob = require('../staticObj');
@@ -20,7 +20,7 @@ async function checkRoleWaiterAndCashier(req, res, next) {
   }
 }
 
-//router.use(checkRoleWaiterAndCashier);
+router.use(checkRoleWaiterAndCashier);
 
 async function doesTableHaveCheck(req, res, next) {
   try {
