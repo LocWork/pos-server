@@ -44,7 +44,7 @@ const knex = Knex({
   connection: {
     host: 'containers-us-west-110.railway.app',
     user: 'postgres',
-    password: 'z4ahAWmfBoSd7f4VPVMP3sB9GF',
+    password: 'z4ahAWmfBoSd7f4VPVMP',
     database: 'railway',
   },
 });
