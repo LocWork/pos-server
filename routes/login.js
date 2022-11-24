@@ -121,6 +121,7 @@ async function validateKitchen(req, res, next) {
       const currentShift = await pool.query(
         "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND W.workdate = CURRENT_DATE AND W.isOpen = true LIMIT 1"
       );
+      console.log(currentShift.rows[0]);
       if (currentShift.rows[0]) {
         req.session.shiftId = currentShift.rows[0].id;
         next();
