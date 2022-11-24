@@ -4,6 +4,50 @@ const pool = require('../db');
 const _ = require('lodash');
 const sob = require('../staticObj');
 
+async function checkRoleWaiter(req, res, next) {
+  try {
+    if (
+      req.session.user.role == sob.WAITER ||
+      req.session.user.role == sob.CASHIER
+    ) {
+      next();
+    } else {
+      res.status(400).json({ msg: `Vai trò của người dùng không phù hợp` });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+}
+
+router.get(`/check/:id`, checkRoleWaiter, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const check = await pool.query(
+      `
+    SELECT C.id,C.creationtime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
+    FROM "check" AS C
+    JOIN "table" AS T
+    ON T.id = C.tableid
+    JOIN "location" AS L
+    ON L.id = T.locationid
+    JOIN "account" AS A
+    ON A.id = C.accountid
+    JOIN "shift" AS S
+    ON S.id = C.shiftid
+    LEFT JOIN "voidreason" AS V
+    ON C.voidreasonid = V.id
+    WHERE C.id = $1;
+   `,
+      [id]
+    );
+    res.status(200).json(check.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+});
+
 async function checkRoleCashier(req, res, next) {
   try {
     if (req.session.user.role == sob.CASHIER) {
@@ -54,34 +98,6 @@ router.get(`/billlist`, async (req, res) => {
     DESC
    `);
     res.status(200).json(billlist.rows);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ msg: 'Lỗi hệ thống' });
-  }
-});
-
-router.get(`/check/:id`, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const check = await pool.query(
-      `
-    SELECT C.id,C.creationtime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime, S.name AS shiftname, C.checkno, A.fullname AS manageby, T.name AS tablename, L.name AS locationname, V.name AS voidreason, C.guestname,C.cover,C.note,C.subtotal, C.totaltax, C.totalamount, C.status
-    FROM "check" AS C
-    JOIN "table" AS T
-    ON T.id = C.tableid
-    JOIN "location" AS L
-    ON L.id = T.locationid
-    JOIN "account" AS A
-    ON A.id = C.accountid
-    JOIN "shift" AS S
-    ON S.id = C.shiftid
-    LEFT JOIN "voidreason" AS V
-    ON C.voidreasonid = V.id
-    WHERE C.id = $1;
-   `,
-      [id]
-    );
-    res.status(200).json(check.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống' });
