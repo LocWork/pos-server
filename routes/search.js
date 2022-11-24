@@ -4,7 +4,7 @@ const pool = require('../db');
 const _ = require('lodash');
 const sob = require('../staticObj');
 
-async function checkRoleWaiter(req, res, next) {
+async function checkRoleWaiterOrCashier(req, res, next) {
   try {
     if (
       req.session.user.role == sob.WAITER ||
@@ -20,7 +20,7 @@ async function checkRoleWaiter(req, res, next) {
   }
 }
 
-router.get(`/check/:id`, checkRoleWaiter, async (req, res) => {
+router.get(`/check/:id`, checkRoleWaiterOrCashier, async (req, res) => {
   try {
     const { id } = req.params;
     const check = await pool.query(
