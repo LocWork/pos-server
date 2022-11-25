@@ -1,17 +1,17 @@
--- Database: restaurant
+-- -- Database: restaurant
 
--- DROP DATABASE IF EXISTS restaurant;
+-- -- DROP DATABASE IF EXISTS restaurant;
 
---  CREATE DATABASE restaurant
---      WITH
---      OWNER = postgres
---      ENCODING = 'UTF8'
---      LC_COLLATE = 'en_US.utf8'
---      LC_CTYPE = 'en_US.utf8'
---      TABLESPACE = pg_default
---      CONNECTION LIMIT = -1
--- 	 TEMPLATE template0
---      IS_TEMPLATE = False;
+-- --  CREATE DATABASE restaurant
+-- --      WITH
+-- --      OWNER = postgres
+-- --      ENCODING = 'UTF8'
+-- --      LC_COLLATE = 'en_US.utf8'
+-- --      LC_CTYPE = 'en_US.utf8'
+-- --      TABLESPACE = pg_default
+-- --      CONNECTION LIMIT = -1
+-- -- 	 TEMPLATE template0
+-- --      IS_TEMPLATE = False;
 
 -- Create TYPE basic_status AS ENUM ('ACTIVE', 'INACTIVE');
 -- CREATE TYPE user_status AS ENUM ('ONLINE', 'OFFLINE', 'INACTIVE');
@@ -261,6 +261,10 @@
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face4.jpg?alt=media&token=103f79c3-e4b6-44ba-9547-252850bdf291');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
 -- 	'kitchen','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Thanh Le','kitchenwork@gmail.com','0908888725','OFFLINE',(SELECT id FROM role WHERE name = 'KITCHEN_STAFF'),
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face5.jpg?alt=media&token=9d2a3f25-28d3-414a-93cf-a5fd3b4ed993');
+
+-- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
+-- 	'manager','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Thanh Khanh','kitchenwork@gmail.com','09077888725','OFFLINE',(SELECT id FROM role WHERE name = 'MANAGER'),
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face5.jpg?alt=media&token=9d2a3f25-28d3-414a-93cf-a5fd3b4ed993');
 
 -- --System settings.
