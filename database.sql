@@ -249,26 +249,26 @@
 -- --password = 123qwe
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
 -- 	'admin','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Van A','adminwork@gmail.com','0908888721','OFFLINE',(SELECT id FROM role WHERE name = 'ADMIN'),
--- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face1.jpg?alt=media&token=8ee476b2-9702-4e74-9b38-7e4be98267fb');
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face1.jpg?alt=media&token=5bb9b934-0dcd-472c-9c01-7abcad725b0b');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
 -- 	'waiter','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Cao Na','waiterwork@gmail.com','0908888722','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'),
--- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face2.jpg?alt=media&token=a9b5cf93-0328-4451-9fee-f3dffd2656c3');
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face2.jpg?alt=media&token=7807aa71-06ba-4353-b508-29c451b96359');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
 -- 	'waiter1','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Cao Ba','waiterwork1@gmail.com','0908888723','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'),
--- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face3.jpg?alt=media&token=d7bccc50-a878-405c-b513-20a7781f5755');	
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face3.jpg?alt=media&token=65a99768-776b-4251-aaea-bb84a3dcd9ed');	
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
 -- 	'cashier','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Tai Ca','cashierwork@gmail.com','0908888724','OFFLINE',(SELECT id FROM role WHERE name = 'CASHIER'),
--- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face4.jpg?alt=media&token=103f79c3-e4b6-44ba-9547-252850bdf291');
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face4.jpg?alt=media&token=a06ae462-6088-4523-aa99-fe0b9e41884d');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
 -- 	'kitchen','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Thanh Le','kitchenwork@gmail.com','0908888725','OFFLINE',(SELECT id FROM role WHERE name = 'KITCHEN_STAFF'),
--- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face5.jpg?alt=media&token=9d2a3f25-28d3-414a-93cf-a5fd3b4ed993');
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face5.jpg?alt=media&token=0a37a284-bc77-4b2a-8761-8e1a355d6508');
 
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
--- 	'manager','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Thanh Khanh','kitchenwork@gmail.com','09077888725','OFFLINE',(SELECT id FROM role WHERE name = 'MANAGER'),
--- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face5.jpg?alt=media&token=9d2a3f25-28d3-414a-93cf-a5fd3b4ed993');
+-- 	'manager','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Thanh Khanh','managerwork@gmail.com','09077888725','OFFLINE',(SELECT id FROM role WHERE name = 'MANAGER'),
+-- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face6.jpg?alt=media&token=96a3c1c1-6138-4f49-9554-68115d237ebc');
 
 -- --System settings.
--- INSERT INTO systemsetting(restaurantname,address,taxvalue,restaurantimage) VALUES('Restaurant A','Default Address', 10,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/logo.png?alt=media&token=3abf9469-7d3c-49e7-a2dd-d47dbdb03f37');
+-- INSERT INTO systemsetting(restaurantname,address,taxvalue,restaurantimage) VALUES('Restaurant A','Default Address', 10,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/logo.jpg?alt=media&token=1c4277c3-daf8-4f51-aeb0-fad84ec808d6');
 
 
 -- --Worksession
@@ -387,196 +387,196 @@
 
 -- --Món Khai vị
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Khai vị' LIMIT 1),'Rau củ tổng hợp','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Rau%20c%E1%BB%A7%20t%C3%B4ng%20h%E1%BB%A3p%2069.jpg?alt=media&token=eeda0a10-073c-4f6d-8a24-1e38405790f2');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Rau%20c%E1%BB%A7%20t%C3%B4ng%20h%E1%BB%A3p%2069.jpg?alt=media&token=b99762bd-e276-424d-b192-1a69db339c5e');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Khai vị' LIMIT 1),'Ngô ngọt','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Ng%C3%B4%20ng%E1%BB%8Dt.jpg?alt=media&token=6af20cb2-28ac-408e-89e6-9a3288e61dd8');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Ng%C3%B4%20ng%E1%BB%8Dt.jpg?alt=media&token=0f1e3a6b-d932-4f3c-a9ef-5d40343b283a');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Khai vị' LIMIT 1),'Đậu bắp nhật','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Dau_Bap_Nhat_20.jpg?alt=media&token=98c1a86f-8328-4f23-9474-59863f94cb3a');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Dau_Bap_Nhat_20.jpg?alt=media&token=11801572-3863-4eb6-aaf2-8abcb82bd822');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Khai vị' LIMIT 1),'Nấm đùi gà nướng','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Nam_Dui_Ga_Nuong_39.jpg?alt=media&token=8d337102-ea63-484e-b97b-133a4d93dc89');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Nam_Dui_Ga_Nuong_39.jpg?alt=media&token=dd984aa1-dee1-4fa8-9638-04ef5f05083a');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Khai vị' LIMIT 1),'Kim Chi cải thảo','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kimchi_Cai_Thao_39.jpg?alt=media&token=f5e0c2c1-ec33-4011-8e10-36e5fec746ee');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kimchi_Cai_Thao_39.jpg?alt=media&token=5138838d-205c-4753-a341-c8a9df3a913f');
 
 -- -- món kèm: khác
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Canh bò cay','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/canh_Canh%20b%C3%B2%20cay.jpg?alt=media&token=eed6cb2e-d9ef-4ae2-aba5-5b047bddc717');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/canh_Canh%20b%C3%B2%20cay.jpg?alt=media&token=c1e441db-1a6c-4130-ad95-52204533839f');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Canh sương bò','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/canh%20s%C6%B0%C6%A1ng%20b%C3%B2%2030k.jpg?alt=media&token=4f8cbab4-909f-4d5d-a9ec-2c65368fcb25');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/canh_canh%20s%C6%B0%C6%A1ng%20b%C3%B2%2030k.jpg?alt=media&token=e78dd775-68f7-48a9-a173-bb4a59621470');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Tôm chiên Tartar','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/T%C3%B4m%20chi%C3%AAn%20s%E1%BB%91t%20Tartar%2089.png?alt=media&token=acdbdadf-e5ed-4e3f-9989-105b328de40b');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/T%C3%B4m%20chi%C3%AAn%20s%E1%BB%91t%20Tartar%2089.jpg?alt=media&token=7fefe718-5fbb-4c57-a5e5-be88067a071b');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Bánh Gyoza chiên','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%C3%A1nh%20chi%C3%AAn%20gyoza.png?alt=media&token=12e672c4-dcd3-4ba7-87db-6e09355c76f6');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%C3%A1nh%20chi%C3%AAn%20gyoza.jpg?alt=media&token=8e51f012-eaaf-4691-b665-460075a61006');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Nấm tiên','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/N%E1%BA%A5m%20ti%C3%AAn%2020.jpg?alt=media&token=68119e2c-2de5-4b30-ab03-7ade1e465b1f');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/N%E1%BA%A5m%20ti%C3%AAn%2020.jpg?alt=media&token=1b1009f3-45d2-4321-a459-575f67bf3d6d');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Nấm linh chi','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/N%E1%BA%A5m%20linh%20chi%2049.jpg?alt=media&token=8bf6e0ac-b32d-4af2-8002-4fa2b16d195c');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/N%E1%BA%A5m%20linh%20chi%2049.jpg?alt=media&token=ee3a25bc-b414-4bc1-ad7c-1ffa998cc639');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Salad','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Salad%2010.jpg?alt=media&token=80ec67a3-7a40-4ebe-9cc1-fb45f7eec7a9');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Salad%2010.jpg?alt=media&token=46372ac9-bb02-4d5a-9f88-82efe714ed75');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Sushi cá hổi','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Sushi%20c%C3%A1%20%E1%BB%95i%2039.jpg?alt=media&token=4d742193-9adf-4e1d-820f-057b70c800de');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Sushi%20c%C3%A1%20%E1%BB%95i%2039.jpg?alt=media&token=4d975061-3b13-4ce5-a132-a82517fef38b');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Toboki hải sản','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Toboki%20h%E1%BA%A3i%20s%E1%BA%A3n%20109.jpg?alt=media&token=927321b8-6e7e-4654-b2d8-ea25de479cea');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Toboki%20h%E1%BA%A3i%20s%E1%BA%A3n%20109.jpg?alt=media&token=c10ba834-7662-49b1-a639-be2c4b0bf451');
 
--- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Mỳ tôm','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/M%C3%AC%20t%C3%B4m%2010.jpg?alt=media&token=5b21fea6-3fac-4a83-bc30-52defdda92fe');
+-- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Mì tôm','ACTIVE',
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/M%C3%AC%20t%C3%B4m%2010.jpg?alt=media&token=809eaa99-11f2-4dd9-b027-c33d22a11067');
 
 -- -- món khác
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Cơm trộn bò bằm','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/C%C6%A1m%20tr%E1%BB%99n%20b%C3%B2%20b%E1%BA%B1m.jpg?alt=media&token=461392c7-1bbc-4918-b35a-4a7b3540fc03');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/C%C6%A1m%20tr%E1%BB%99n%20b%C3%B2%20b%E1%BA%B1m.jpg?alt=media&token=128467ca-f86b-4ead-8a66-107b9ffde74d');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'Cơm rang cá hồi','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/C%C6%A1m%20rang%20c%C3%A1%20h%E1%BB%93i.jpg?alt=media&token=353c4356-69dc-4d54-98ac-f0aca4e619e7');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/C%C6%A1m%20rang%20c%C3%A1%20h%E1%BB%93i.jpg?alt=media&token=bfdcd556-05d2-4f5e-b75a-c5ffc856a735');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'COMBO cơm sườn bò Mỹ','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20c%C6%A1m%20s%C6%B0%E1%BB%9Dng%20b%C3%B2%20m%E1%BB%B9.jpg?alt=media&token=bee1005f-fa55-45f7-bf9d-1aca55b74af1');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20c%C6%A1m%20s%C6%B0%E1%BB%9Dng%20b%C3%B2%20m%E1%BB%B9.jpg?alt=media&token=e3e531d2-5a49-4a6d-9766-1fc203d4decf');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'COMBO mực sốt gừng','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20c%C6%A1m%20m%E1%BB%B1c%20s%E1%BB%91t%20g%E1%BB%ABng.jpg?alt=media&token=445b7908-8398-445a-b04b-e87f73c21b95');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20c%C6%A1m%20m%E1%BB%B1c%20s%E1%BB%91t%20g%E1%BB%ABng.jpg?alt=media&token=39a7698d-c7d2-4b8b-a6ea-a5dd820e43a4');
 
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Trái cây theo mùa','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Trai%20cay%20theo%20mua%2049k.png?alt=media&token=7ce04d1e-5210-4564-8e52-298bab13fd39');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Trai%20cay%20theo%20mua%2049k.jpg?alt=media&token=a146a77f-b044-4b8a-a41a-e868357a017c');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Kem chocolate','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem%20chocola.jpg?alt=media&token=758f77c3-9412-4081-b1db-e593804a482e');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem%20chocola.jpg?alt=media&token=72e7dac4-91c7-4c0e-900a-9e50882ab694');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Kem vani','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem%20vani.jpg?alt=media&token=880ceffe-54f7-449a-b029-13eb792bdc41');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem%20vani.jpg?alt=media&token=7d494aef-250d-445b-b92d-2faa93840a07');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Kem dâu','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem%20dau.jpg?alt=media&token=5ce3071c-6670-46db-a3a6-fb65351e4f96');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem%20dau.jpg?alt=media&token=3dc4d391-413e-487d-85d5-6e64b78a6d65');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Kem khoai môn','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem_Khoai_Mon.jpg?alt=media&token=cc6b5636-0eb9-4049-bc8d-7eb9168ef08a');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Kem_Khoai_Mon.jpg?alt=media&token=5526ae96-71d0-4e5b-bf19-8a2fbe4d4562');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Chè khúc bạch','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Ch%C3%A8%20kh%C3%BAc%20b%E1%BA%A1ch.jpg?alt=media&token=d6c28cdd-faf8-495d-a543-815a4ccb72f8');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Ch%C3%A8%20kh%C3%BAc%20b%E1%BA%A1ch.jpg?alt=media&token=b0e7c0c9-b5fb-42a1-b45b-ac47431223e6');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'Trà và bánh bạc hà','ACTIVE',
--- 												 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Tr%C3%A1ng%20mi%E1%BB%87ng%20tr%C3%A0%20v%C3%A0%20b%C3%A1nh%20b%E1%BA%A1c%20h%C3%A0%2059.PNG?alt=media&token=ddbd2d1f-1d00-4fbc-ae8c-d4917be2cb63');
+-- 												 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Tr%C3%A1ng%20mi%E1%BB%87ng%20tr%C3%A0%20v%C3%A0%20b%C3%A1nh%20b%E1%BA%A1c%20h%C3%A0%2059.jpg?alt=media&token=5ea124d3-0e2a-481a-9e50-fb801d45efa1');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'Uyên Ương Lẩu','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Uy%C3%AAn%20%C6%AF%C6%A1ng%20L%E1%BA%A9u%20225%20.PNG?alt=media&token=fb816df0-b7fd-4b68-8445-7b65d4ca38de');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Uy%C3%AAn%20%C6%AF%C6%A1ng%20L%E1%BA%A9u%20225%20.jpg?alt=media&token=4c10ab4c-1910-46fb-b810-018b77701032');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'Lẩu Nhúng bò Mỹ','ACTIVE', 
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20nh%C3%BAng%20b%C3%B2%20m%E1%BB%B9%20150.PNG?alt=media&token=37b3f9f3-ecc4-4367-8633-30dd5e22f516');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20nh%C3%BAng%20b%C3%B2%20m%E1%BB%B9%20150.jpg?alt=media&token=7422eb17-74c7-4838-8934-6287ed7fb472');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'Lẩu rau HongKong','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20rau%20hongkong%20150.PNG?alt=media&token=eda745a6-b128-4d99-83f1-1cb5a3e1ec29');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20rau%20hongkong%20150.jpg?alt=media&token=b4d2d47c-e53f-4753-b151-6faa2910353a');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'Lẩu rau nấm tổng hợp','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Rau_Nam_Tong_Hop_Kem_Lau_59.jpg?alt=media&token=41d0db3d-fc79-484d-9301-503c4cca3314');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Rau_Nam_Tong_Hop_Kem_Lau_59.jpg?alt=media&token=8ae78bb1-880d-4310-a652-cc1a076fe1df');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'Lẩu mực nhỏ','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/lau%20muc%20nh%E1%BB%8F.png?alt=media&token=fcdb5a7c-016f-4ebf-a736-2a45ac8eb797');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/lau%20muc%20nh%E1%BB%8F.jpg?alt=media&token=0661e55f-5f56-4691-8595-7697043d0368');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'Lẩu Miso Kim Chi','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/lau%20miso%20kimchi.jpg?alt=media&token=95f19f37-aff5-412d-a88f-345768ecab1f');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/lau%20miso%20kimchi.jpg?alt=media&token=443870f0-3377-45d2-a9aa-abab0cbf79cc');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Bò angus','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/bo-angus%20109.jpg?alt=media&token=f27ac675-4d45-40d6-a47f-7ced1bd18c2f');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/bo-angus%20109.jpg?alt=media&token=9aeda456-1a24-486e-8114-a509aa5988c4');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Sườn non obothan','ACTIVE', 
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/S%C6%B0%E1%BB%9Dn%20non%20obathan%20209.jpg?alt=media&token=2d6d0067-f26a-4c45-ad22-934faffd0dfe');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/S%C6%B0%E1%BB%9Dn%20non%20obathan%20209.jpg?alt=media&token=ab3e910e-e0fc-4734-83aa-cf66f34cac7e');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Sườn gali','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/s%C6%B0%E1%BB%9Dn%20Galbi_109.jpg?alt=media&token=eba8a5d1-1d6d-4bcf-9dbf-6556af28d6f1');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/s%C6%B0%E1%BB%9Dn%20Galbi_109.jpg?alt=media&token=0baf56a7-414f-4bfc-83f2-00f8e1c2820e');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Sườn mật ong','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/s%C6%B0%E1%BB%9Dn%20m%E1%BA%ADt%20ong%20109.jpg?alt=media&token=1b24e85d-b5d8-41df-9cd7-576c28c5f3f0');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/s%C6%B0%E1%BB%9Dn%20m%E1%BA%ADt%20ong%20109.jpg?alt=media&token=7737a7cc-e3d3-4e97-8b54-59d0be2f7c35');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Bò và heo thượng hạng','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%C3%B2%20v%C3%A0%20heo%20th%C6%B0%E1%BB%A3ng%20h%E1%BA%A1ng.jpg?alt=media&token=08f7cebf-01b2-4105-996d-b2707d71cfcb');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%C3%B2%20v%C3%A0%20heo%20th%C6%B0%E1%BB%A3ng%20h%E1%BA%A1ng.jpg?alt=media&token=34b98ee2-6513-4a45-9d94-8ba9986de106');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Má heo tươi tryền thống','ACTIVE', 
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/ma%20heo%20t%C6%B0%C6%A1i%20truy%E1%BB%81n%20th%E1%BB%91ng.jpg?alt=media&token=08fedcac-7ea1-45af-a26b-e9f9b3847a6e');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/ma%20heo%20t%C6%B0%C6%A1i%20truy%E1%BB%81n%20th%E1%BB%91ng.jpg?alt=media&token=1c0d66dd-8230-4ecd-82e1-b277c3b1f981');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Heo nạt phủ sốt đậu','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Heo%20n%E1%BA%A1t%20ph%E1%BB%A7%20s%E1%BB%91t%20%C4%91%E1%BA%ADu.jpg?alt=media&token=7c551761-6bc8-4ce5-a7fc-d780a83555a4');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Heo%20n%E1%BA%A1t%20ph%E1%BB%A7%20s%E1%BB%91t%20%C4%91%E1%BA%ADu.jpg?alt=media&token=6962cccd-4096-4682-bf3e-8be442fa38f5');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Bụng bò đơn','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%E1%BB%A5ng%20b%C3%B2%20t%C6%B0%E1%BB%9Di%20%C4%91%C6%A1n%2040.jpg?alt=media&token=78a6c93a-1ddc-40b6-9e10-a115c7d441fb');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%E1%BB%A5ng%20b%C3%B2%20t%C6%B0%E1%BB%9Di%20%C4%91%C6%A1n%2040.jpg?alt=media&token=955be59f-e085-4363-939d-d52c5c6ea59c');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Tôm nướng (10 xiên)','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%E1%BB%A5ng%20b%C3%B2%20t%C6%B0%E1%BB%9Di%20%C4%91%C6%A1n%2040.jpg?alt=media&token=78a6c93a-1ddc-40b6-9e10-a115c7d441fb');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/T%C3%B4m%20n%C6%B0%E1%BB%9Bng%2010.jpg?alt=media&token=9cd99f33-8f8b-483d-b225-8da0f679445f');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'COMBO lẩu thái thập cẩm','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20l%E1%BA%A9u%20th%C3%A1i%20th%E1%BA%ADp%20c%E1%BA%A9m%20399.png?alt=media&token=3167d80d-906f-44c4-bbdb-485c3a778847');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20l%E1%BA%A9u%20th%C3%A1i%20th%E1%BA%ADp%20c%E1%BA%A9m%20399.jpg?alt=media&token=ff109e32-02a5-42a1-a31e-de3b758fd6bf');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'COMBO lẩu thái bò sụn','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20th%C3%A1i%20b%C3%B2%20s%E1%BB%A5n-6-10.%20790png.png?alt=media&token=802f50b9-4a8c-4ff8-b8a7-5980b99d3b83');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20th%C3%A1i%20b%C3%B2%20s%E1%BB%A5n-6-10.%20790png.jpg?alt=media&token=6941afc6-0ea4-4364-919e-67a20c177b97');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'COMBO lẩu riêu ba chỉ bò Mỹ','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20ri%C3%AAu-ba-ch%E1%BB%89-b%C3%B2-m%E1%BB%B9-ss-4-6ng%20590.png?alt=media&token=997ac8e7-9473-4440-9071-656560c6f978');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20ri%C3%AAu-ba-ch%E1%BB%89-b%C3%B2-m%E1%BB%B9-ss-4-6ng%20590.jpg?alt=media&token=6cd59e89-8c67-4f78-a6ef-114986a75069');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'COMBO Kim Chi hải sản','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20kim%20chi%20h%E1%BA%A3i%20s%E1%BA%A3n%20490.png?alt=media&token=de31a797-d6d2-4f85-a4d8-a512e8be9407');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/L%E1%BA%A9u%20kim%20chi%20h%E1%BA%A3i%20s%E1%BA%A3n%20490.jpg?alt=media&token=582c4f8c-d83d-40d2-a2c6-b522ca8c8df9');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'COMBO bò nướng cổ điển','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20b%C3%B2%20n%C6%B0%E1%BB%9Bng%20c%E1%BB%95%20%C4%91i%E1%BB%83n%20199.PNG?alt=media&token=873e9307-7f6b-4423-96c9-9ed9e6bffd0b');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20b%C3%B2%20n%C6%B0%E1%BB%9Bng%20c%E1%BB%95%20%C4%91i%E1%BB%83n%20199.jpg?alt=media&token=624ce4ae-7d62-4185-8a94-2aac341f6d43');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'COMBO nướng thượng hàng','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/combo%20n%C6%B0%E1%BB%9Bng%20h%C6%B0%E1%BB%A3ng%20h%E1%BA%A1ng%20590.jpg?alt=media&token=a046023e-b165-486f-ad91-14cd6649f61d');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/B%C3%B2%20v%C3%A0%20heo%20th%C6%B0%E1%BB%A3ng%20h%E1%BA%A1ng.jpg?alt=media&token=34b98ee2-6513-4a45-9d94-8ba9986de106');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'COMBO kem ly Hàn Quốc','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20kem%20tr%C3%A1ng%20mi%E1%BB%87ng%203%20ng%C6%B0%E1%BB%9Di%20HQ%20180.PNG?alt=media&token=0559be34-49ff-4568-96e5-49eff2f56016');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20kem%20tr%C3%A1ng%20mi%E1%BB%87ng%203%20ng%C6%B0%E1%BB%9Di%20HQ%20180.jpg?alt=media&token=f7b7cab8-1ec3-4b79-9a46-d47e28f35c10');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Tráng miệng' LIMIT 1),'COMBO bánh kem mini Hàn Quốc','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20b%C3%A1nh%20mini%20259.PNG?alt=media&token=86730379-754b-425d-8293-667d8fa38f9d');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Combo%20kem%20tr%C3%A1ng%20mi%E1%BB%87ng%203%20ng%C6%B0%E1%BB%9Di%20HQ%20180.jpg?alt=media&token=f7b7cab8-1ec3-4b79-9a46-d47e28f35c10');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món khác' LIMIT 1),'COMBO thịt bò và tôm mini','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/COMBO%20khai%20v%E1%BB%8B%20th%E1%BB%8Bt%20b%C3%B2%20v%C3%A0%20t%C3%B4m%20mini%20.PNG?alt=media&token=7204f96b-b5d6-427c-b35c-a268e80abbef');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/COMBO%20khai%20v%E1%BB%8B%20th%E1%BB%8Bt%20b%C3%B2%20v%C3%A0%20t%C3%B4m%20mini%20.jpg?alt=media&token=ff3d1303-b3c3-4bb3-8414-00b2fcc57c2e');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món lẩu' LIMIT 1),'COMBO lẩu hải sản 1 người','ACTIVE', 
--- 														 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/COMBO%20l%E1%BA%A9u%201%20h%E1%BA%A3i%20s%E1%BA%A3n%201%20ng%C6%B0%E1%BB%9Di.jpg?alt=media&token=b1b856ee-c8ba-4878-b8d8-ee685d3c516f');
+-- 														 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/COMBO%20l%E1%BA%A9u%201%20h%E1%BA%A3i%20s%E1%BA%A3n%201%20ng%C6%B0%E1%BB%9Di.jpg?alt=media&token=46fd91cf-bc55-417e-a78b-59aae407c864');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Nước Dasani','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Nuoc%20dasani.jpg?alt=media&token=46f2752e-f299-4aa6-af29-64ed2b047d95');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Nuoc%20dasani.jpg?alt=media&token=46e691cf-980a-4ada-be9d-965933507004');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Nước ngọt Fanta','ACTIVE'
--- 														,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Fanta.png?alt=media&token=3f269e2d-ad79-46a5-9ce6-5f7efc41adb8');
+-- 														,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Fanta.jpg?alt=media&token=c9a965ad-92cd-40b9-90f4-f1206bc84a82');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Nước ngọt soda chanh đường','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Soda_Chanh_Duong_1_3.jpg?alt=media&token=66658f70-3da8-402e-a4d5-97d64309c135');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Soda_Chanh_Duong_1_3.jpg?alt=media&token=cbbb4eb2-ff5c-420d-b596-98217409fc5f');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Nước ép tropical bạc hà','ACTIVE',
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Tropical_Teapot_Vi_Bac_Ha_1_1.jpg?alt=media&token=bad566eb-0470-40ba-9a08-18a8e8a5d4a9');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Tropical_Teapot_Vi_Bac_Ha_1_1.jpg?alt=media&token=ab207d66-319a-4dee-a59f-e92625359154');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Nước ép dưa hấu','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Nuoc_Ep_Dua_Hau_1_1.jpg?alt=media&token=3e51106b-994d-460b-8330-91c8ed86cace');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Nuoc_Ep_Dua_Hau_1_1.jpg?alt=media&token=cfbdacc4-93ae-41c7-af07-48e750815f33');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Bia Strong Bow Golden Apple','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Strongbow_Gold_Apple_1_1.jpg?alt=media&token=3dd64c2e-fc86-4adc-bd13-61dd2473d60a');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Strongbow_Gold_Apple_1_1.jpg?alt=media&token=bca3e48b-9e03-4b0d-9bdf-df9db6b5fff5');
 
 -- INSERT INTO item(majorgroupid,name,status, image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Bia Tiger Crystal','ACTIVE', 
--- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Bia%20Tiger%20Crystal.jpg?alt=media&token=398c3aae-fa66-48af-8508-df510ceb4e23');
+-- 														'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Bia%20Tiger%20Crystal.jpg?alt=media&token=dda71e80-02d7-4c66-b048-d45e63d70fbc');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Bia Tiger','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Bia%20Tiger.jpg?alt=media&token=31f2aaa5-a9a2-4d27-acac-c79474459e15');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Bia%20Tiger.jpg?alt=media&token=4495b567-d4f5-458e-b2e5-b9db0dbb04cc');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Bia Heineken','ACTIVE'
--- 														,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Bia%20Heineken.jpg?alt=media&token=a1a443de-dc63-4c33-ac56-97815e992850');
+-- 														,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Bia%20Heineken.jpg?alt=media&token=589c364d-e90a-4711-9eae-e23c650a752b');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Rượu vang đỏ Vina Maipo','ACTIVE'
--- 													   ,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Ruou_Vang_Do_Vina_Maipo_Cabernet_Sauvignon_1_1.jpg?alt=media&token=78314c16-3320-483c-b441-e4aea0447978');
+-- 													   ,'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/Ruou_Vang_Do_Vina_Maipo_Cabernet_Sauvignon_1_1.jpg?alt=media&token=f9fcb3cf-d5b8-4f41-b57e-4d091f9c0711');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Nước uống' LIMIT 1),'Rượu vang trắng Legende','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/R%E1%BB%B1u%20Vang%20Tr%E1%BA%AFng%20Legende.jpg?alt=media&token=d1d2762c-f21d-4b3d-8274-1d4bad41390b');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/R%E1%BB%B1u%20Vang%20Tr%E1%BA%AFng%20Legende.jpg?alt=media&token=8b40c39b-e5d4-4167-a81e-e349f51b93ed');
 
 -- INSERT INTO item(majorgroupid,name,status,image) VALUES((SELECT id FROM "majorgroup" WHERE status = 'ACTIVE' AND name = 'Món nướng' LIMIT 1),'Xiêng xông khói','ACTIVE',
--- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/xi%C3%AAng%20x%C3%B4ng%20kh%C3%B3i.PNG?alt=media&token=714b4aa7-a7ad-4a0e-84ba-01cd1d36d005');
+-- 													   'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/xi%C3%AAng%20x%C3%B4ng%20kh%C3%B3i.jpg?alt=media&token=a708862a-d0b3-46f3-829b-7374a74d4b5c');
 
 -- --Menu item bữa sáng
 -- --Khai vị
@@ -946,4 +946,3 @@
 -- INSERT INTO paymentmethod("name",status) VALUES('Tiền mặt','ACTIVE');
 -- INSERT INTO paymentmethod("name",status) VALUES('MoMo','ACTIVE');
 -- INSERT INTO paymentmethod("name",status) VALUES('Séc ngân hàng','ACTIVE');
-
