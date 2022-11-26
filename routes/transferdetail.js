@@ -225,7 +225,7 @@ async function transferDetailSingle(
     //for updating the current check
     var temp = currentDetail;
 
-    temp.quantity = (temp.quantity - transferDetail.quantity).toFixed(3);
+    temp.quantity = (temp.quantity - transferDetail.quantity).toFixed(2);
     temp.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp.amount = Math.ceil(temp.subtotal + temp.taxAmount);
@@ -244,7 +244,7 @@ async function transferDetailSingle(
 
     //for insert/transfer to the new check
     var temp1 = currentDetail;
-    temp1.quantity = transferDetail.quantity.toFixed(3);
+    temp1.quantity = transferDetail.quantity.toFixed(2);
     temp1.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp1.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp1.amount = Math.ceil(temp.subtotal + temp.taxAmount);
@@ -434,7 +434,7 @@ async function transferPercent(
     Object.freeze(retainValue);
     var temp = checkdetail;
     temp.quantity = (temp.quantity - temp.quantity * (percent / 100)).toFixed(
-      3
+      2
     );
     temp.completedquanitity = temp.quantity;
     temp.subtotal = Math.ceil(temp.itemprice * temp.quantity);
@@ -454,7 +454,7 @@ async function transferPercent(
       ]
     );
 
-    temp.quantity = (retainValue * (percent / 100)).toFixed(3);
+    temp.quantity = (retainValue * (percent / 100)).toFixed(2);
     temp.completedquanitity = temp.quantity;
     temp.subtotal = Math.ceil(temp.itemprice * temp.quantity);
     temp.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
@@ -523,7 +523,7 @@ router.put(
       var detaillist = checkDetailList.rows;
 
       for (var i = 0; i < detaillist.length; i++) {
-        var quantity = (detaillist[i].quantity * (percent / 100)).toFixed(3);
+        var quantity = (detaillist[i].quantity * (percent / 100)).toFixed(2);
         if (percent == 100 || quantity == 0) {
           await transferDetailInFull(
             secondTableCheck.rows[0].id,
