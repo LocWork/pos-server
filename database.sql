@@ -931,8 +931,10 @@
 -- 												 (SELECT id FROM "menu" WHERE status = 'ACTIVE' AND name = 'Combo' LIMIT 1), 189000);
 												 
 -- INSERT INTO menuitem(itemid,menuid,price) VALUES((SELECT id FROM "item" WHERE status = 'ACTIVE' AND name = 'COMBO mực sốt gừng' LIMIT 1), 
--- 												 (SELECT id FROM "menu" WHERE status = 'ACTIVE' AND name = 'Combo' LIMIT 1), 189000);												 
+-- 												 (SELECT id FROM "menu" WHERE status = 'ACTIVE' AND name = 'Combo' LIMIT 1), 189000);		
 												 
+-- INSERT INTO menuitem(itemid,menuid,price) VALUES((SELECT id FROM "item" WHERE status = 'ACTIVE' AND name = 'COMBO bò nướng cổ điển' LIMIT 1), 
+-- 												 (SELECT id FROM "menu" WHERE status = 'ACTIVE' AND name = 'Combo' LIMIT 1), 189000);													 
 -- --voidreason
 -- INSERT INTO voidreason("name",status) VALUES('Khách hủy món','ACTIVE');
 -- INSERT INTO voidreason("name",status) VALUES('Lỗi nhân viên','ACTIVE');
