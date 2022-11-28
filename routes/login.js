@@ -234,7 +234,7 @@ router.post('/kds', validateUserKitchen, validateKitchen, async (req, res) => {
 router.get(`/shift`, async (req, res) => {
   try {
     const shiftList = await pool.query(`
-    SELECT S.id, S.name, S.starttime, S.endtime 
+    SELECT S.id, S.name, S.starttime::time at time zone 'utc' at time zone 'Asia/Bangkok' , S.endtime::time at time zone 'utc' at time zone 'Asia/Bangkok'
     FROM shift AS S 
     JOIN worksession AS W 
     ON S.worksessionid = W.id 
@@ -266,7 +266,7 @@ router.get(`/shift`, async (req, res) => {
     res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
 });
-
+//CURRENT_TIMESTAMP::time at time zone 'utc' at time zone 'Asia/Bangkok'
 router.put(`/cashieropen/:shiftid`, async (req, res) => {
   try {
     const { shiftid } = req.params;
