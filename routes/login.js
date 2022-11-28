@@ -234,7 +234,7 @@ router.post('/kds', validateUserKitchen, validateKitchen, async (req, res) => {
 router.get(`/shift`, async (req, res) => {
   try {
     const shiftList = await pool.query(`
-    SELECT S.id, S.name, S.starttime::time at time zone 'utc' at time zone 'Asia/Bangkok' as starttime, S.endtime::time at time zone 'utc' at time zone 'Asia/Bangkok' as endtime
+    SELECT S.id, S.name, S.starttime::time at time zone 'utc' as starttime, S.endtime::time at time zone 'utc' as endtime
     FROM shift AS S 
     JOIN worksession AS W 
     ON S.worksessionid = W.id 
