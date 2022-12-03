@@ -230,7 +230,10 @@ router.get('/menu/:id/outofstock', async (req, res) => {
       );
     } else {
       getMenuItems = await pool.query(`
-      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image,
+       CASE
+	    WHEN (SELECT status AS id FROM itemoutofstock WHERE itemid = I.id) = 'EMPTY' THEN 'EMPTY'
+	    END status
       FROM item AS I
       WHERE I.status = 'ACTIVE' AND I.id IN (SELECT itemid AS id FROM itemoutofstock WHERE status = 'EMPTY')
       `);
