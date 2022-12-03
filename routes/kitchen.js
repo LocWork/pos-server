@@ -221,7 +221,7 @@ router.get('/menu/:id/outofstock', async (req, res) => {
       ON MI.menuid = M.id
       JOIN item AS I
       ON MI.itemid = I.id
-      WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id IN (SELECT itemid AS id FROM itemoutofstock)
+      WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id IN (SELECT itemid AS id FROM itemoutofstock WHERE status = 'EMPTY');
       `,
         [id]
       );
@@ -229,7 +229,7 @@ router.get('/menu/:id/outofstock', async (req, res) => {
       getMenuItems = await pool.query(`
       SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
       FROM item AS I
-      WHERE I.status = 'ACTIVE' AND I.id IN (SELECT itemid AS id FROM itemoutofstock)
+      WHERE I.status = 'ACTIVE' AND I.id IN (SELECT itemid AS id FROM itemoutofstock WHERE status = 'EMPTY')
       `);
     }
     res.status(200).json(getMenuItems.rows);
@@ -239,20 +239,57 @@ router.get('/menu/:id/outofstock', async (req, res) => {
   }
 });
 
-//add item to out of stock
-router.post('/add/outofstock/', async (req, res) => {
+//Add iitem to out of stock warning
+router.post('/add/outofstock/warning', async (req, res) => {
   try {
     const { itemlist } = req.body;
     for (var i = 0; i < itemlist.length; i++) {
       var checkitem = await pool.query(
-        `SELECT itemid FROM itemoutofstock WHERE itemid = $1`,
+        `SELECT itemid, status FROM itemoutofstock WHERE itemid = $1`,
         [itemlist[i].id]
       );
       if (checkitem.rows[0] == null) {
         var additem = await pool.query(
-          `INSERT INTO itemoutofstock(itemid) VALUES($1) `,
+          `INSERT INTO itemoutofstock(itemid,status) VALUES($1,'WARNING') `,
           [itemlist[i].id]
         );
+      } else {
+        if (checkitem.rows[0].status == sob.EMPTY) {
+          var updateitem = await pool.query(
+            `UPDATE itemoutofstock SET status = 'WARNING' WHERE itemid = $1`,
+            [itemlist[i].id]
+          );
+        }
+      }
+    }
+    res.status(200).json();
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+});
+
+//add item to out of stock empty
+router.post('/add/outofstock/empty', async (req, res) => {
+  try {
+    const { itemlist } = req.body;
+    for (var i = 0; i < itemlist.length; i++) {
+      var checkitem = await pool.query(
+        `SELECT itemid, status FROM itemoutofstock WHERE itemid = $1`,
+        [itemlist[i].id]
+      );
+      if (checkitem.rows[0] == null) {
+        var additem = await pool.query(
+          `INSERT INTO itemoutofstock(itemid,status) VALUES($1,'EMPTY') `,
+          [itemlist[i].id]
+        );
+      } else {
+        if (checkitem.rows[0].status == sob.WARNING) {
+          var updateitem = await pool.query(
+            `UPDATE itemoutofstock SET status = 'EMPTY' WHERE itemid = $1`,
+            [itemlist[i].id]
+          );
+        }
       }
     }
     res.status(200).json();

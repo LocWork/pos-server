@@ -10,6 +10,8 @@ class sob {
   static PARTNERCODE = 'MOMODJMX20220717';
   static ACCESSKEY = 'WehkypIRwPP14mHb';
   static SECRETKEY = '3fq8h4CqAAPZcTTb3nCDpFKwEkQDsZzz';
+  static WARNING = 'WARNING';
+  static EMPTY = 'EMPTY';
 }
 
 module.exports = sob;
