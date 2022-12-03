@@ -21,7 +21,7 @@ router.use(checkRoleCashier);
 router.get('/', async (req, res) => {
   try {
     const list =
-      await pool.query(`SELECT C.id, S.name as shiftname, A.fullname,C.creationTime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime,C.type, C.amount
+      await pool.query(`SELECT C.id, S.name as shiftname, A.fullname,C.creationTime::timestamp at time zone 'utc' at time zone 'Asia/Bangkok' AS creationtime,C.type, C.amount, C.isverify
      FROM cashierlog AS C
      JOIN "shift" AS S
      ON C.shiftid = S.id
@@ -37,6 +37,28 @@ router.get('/', async (req, res) => {
     res.status(400).json({ msg: 'Lỗi hệ thống!' });
   }
 });
+
+async function canUpdateCashierLog(req, res, next) {
+  try {
+    const { id } = req.params;
+    const cashierLog = await pool.query(
+      `SELECT isverify from cashierlog WHERE id = $1`,
+      [id]
+    );
+    if (cashierLog.rows[0]) {
+      if (cashierLog.rows[0].isverify == true) {
+        res.status(400).json({ msg: 'Không thể cập nhật' });
+      } else {
+        next();
+      }
+    } else {
+      res.status(400).json({ msg: 'Không tìm thấy thông tin' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+}
 
 router.get('/:id', async (req, res) => {
   try {
@@ -61,7 +83,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', canUpdateCashierLog, async (req, res) => {
   try {
     const { id } = req.params;
     const { amount } = req.body;

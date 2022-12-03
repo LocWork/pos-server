@@ -26,14 +26,14 @@ async function massViewUpdate(id, req, res) {
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
 
-    if (id && id != 0) {
-      req.io
-        .to(`POS-L-${id}`)
-        .emit(
-          'update-pos-tableOverview',
-          await helpers.updateTableOverview(id)
-        );
-    }
+    // if (id && id != 0) {
+    //   req.io
+    //     .to(`POS-L-${id}`)
+    //     .emit(
+    //       'update-pos-tableOverview',
+    //       await helpers.updateTableOverview(id)
+    //     );
+    // }
 
     req.io
       .to(`KDS-L-0`)

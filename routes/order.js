@@ -64,12 +64,12 @@ async function massViewUpdate(currentLocationId, req, res) {
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
 
-    req.io
-      .to(`POS-L-${currentLocationId}`)
-      .emit(
-        'update-pos-tableOverview',
-        await helpers.updateTableOverview(currentLocationId)
-      );
+    // req.io
+    //   .to(`POS-L-${currentLocationId}`)
+    //   .emit(
+    //     'update-pos-tableOverview',
+    //     await helpers.updateTableOverview(currentLocationId)
+    //   );
 
     req.io
       .to(`KDS-L-0`)
@@ -86,12 +86,12 @@ async function overViewUpdate(currentLocationId, req, res) {
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
 
-    req.io
-      .to(`POS-L-${currentLocationId}`)
-      .emit(
-        'update-pos-tableOverview',
-        await helpers.updateTableOverview(currentLocationId)
-      );
+    // req.io
+    //   .to(`POS-L-${currentLocationId}`)
+    //   .emit(
+    //     'update-pos-tableOverview',
+    //     await helpers.updateTableOverview(currentLocationId)
+    //   );
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống' });

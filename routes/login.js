@@ -239,7 +239,7 @@ router.get(`/shift`, async (req, res) => {
     JOIN worksession AS W 
     ON S.worksessionid = W.id 
     WHERE W.isopen = true AND W.workdate = CURRENT_DATE AND 
-	  ((NOW()::time <= S.starttime) OR (NOW()::time >= S.starttime AND NOW()::time < S.endtime)) 
+	  ((NOW()::time < S.endtime)) 
 	  AND (S.starttime >= COALESCE(
 		(SELECT MAX(S1.endtime) as time FROM "shift" AS S1 
 		JOIN worksession AS W1 
@@ -288,7 +288,7 @@ router.put(`/cashieropen/:shiftid`, async (req, res) => {
         if (updateShift.rows[0]) {
           const open = await pool.query(
             `
-      INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount) VALUES($1,$2,NOW()::timestamp,'OPEN',$3) RETURNING id
+      INSERT INTO cashierlog(accountid, shiftid,creationtime,type,amount, isverify) VALUES($1,$2,NOW()::timestamp,'OPEN',$3,false) RETURNING id
       `,
             [req.session.user.id, updateShift.rows[0].id, amount]
           );
