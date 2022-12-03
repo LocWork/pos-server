@@ -215,7 +215,10 @@ router.get('/menu/:id/outofstock', async (req, res) => {
     if (id && id != 0) {
       getMenuItems = await pool.query(
         `
-      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image, 
+      CASE
+	    WHEN (SELECT status AS id FROM itemoutofstock WHERE itemid = I.id) = 'EMPTY' THEN 'EMPTY'
+	    END status
       FROM menu AS M
       JOIN menuitem AS MI
       ON MI.menuid = M.id
@@ -314,10 +317,6 @@ router.delete('/remove/outofstock/', async (req, res) => {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống' });
   }
-});
-router.get('/demo', async (req, res) => {
-  massViewUpdate(0, req, res);
-  res.status(200).json();
 });
 
 //Notify item is done ready;
