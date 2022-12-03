@@ -116,7 +116,7 @@ async function isAllItemInStock(req, res, next) {
     for (var i = 0; i < req.body.itemlist.length; i++) {
       var detail = req.body.itemlist[i];
       var itemCheck = await pool.query(
-        `SELECT S.id , I.name 
+        `SELECT S.id , I.name, S.status 
         FROM itemOutOfStock AS S 
         JOIN item AS I
         ON I.id = S.itemid
@@ -124,8 +124,10 @@ async function isAllItemInStock(req, res, next) {
         [detail.itemid]
       );
       if (itemCheck.rows[0]) {
-        name = itemCheck.rows[0].name;
-        flag = false;
+        if (itemCheck.rows[0].status == sob.EMPTY) {
+          name = itemCheck.rows[0].name;
+          flag = false;
+        }
       }
     }
     if (flag) {
