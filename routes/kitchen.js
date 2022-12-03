@@ -49,16 +49,16 @@ async function massViewUpdateList(list, req, res) {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].id && list[i].id != 0) {
-        req.io
-          .to(`POS-L-${list[i].id}`)
-          .emit(
-            'update-pos-tableOverview',
-            await helpers.updateTableOverview(list[i].id)
-          );
-      }
-    }
+    // for (var i = 0; i < list.length; i++) {
+    //   if (list[i].id && list[i].id != 0) {
+    //     req.io
+    //       .to(`POS-L-${list[i].id}`)
+    //       .emit(
+    //         'update-pos-tableOverview',
+    //         await helpers.updateTableOverview(list[i].id)
+    //       );
+    //   }
+    // }
 
     req.io
       .to(`KDS-L-0`)
@@ -174,21 +174,30 @@ router.get('/menu/:id/instock', async (req, res) => {
     if (id && id != 0) {
       getMenuItems = await pool.query(
         `
-      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image,
+	    CASE
+	    WHEN I.id NOT IN (SELECT itemid AS id FROM itemoutofstock) THEN 'INSTOCK'
+	    WHEN (SELECT status AS id FROM itemoutofstock WHERE itemid = I.id) = 'WARNING' THEN 'WARNING'
+	    END status
       FROM menu AS M
       JOIN menuitem AS MI
       ON MI.menuid = M.id
       JOIN item AS I
       ON MI.itemid = I.id
-      WHERE I.status = 'ACTIVE' AND M.id = $1 AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
+      WHERE I.status = 'ACTIVE' AND M.id = $1 AND (I.id NOT IN (SELECT itemid AS id FROM itemoutofstock) OR (I.id IN (SELECT itemid AS id FROM itemoutofstock WHERE status = 'WARNING')));
+
       `,
         [id]
       );
     } else {
       getMenuItems = await pool.query(`
-      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image
+      SELECT I.id AS itemid, I.name,I.majorGroupId, I.image,
+      CASE
+	    WHEN I.id NOT IN (SELECT itemid AS id FROM itemoutofstock) THEN 'INSTOCK'
+	    WHEN (SELECT status AS id FROM itemoutofstock WHERE itemid = I.id) = 'WARNING' THEN 'WARNING'
+	    END status
       FROM item AS I
-      WHERE I.status = 'ACTIVE' AND I.id NOT IN (SELECT itemid AS id FROM itemoutofstock)
+      WHERE I.status = 'ACTIVE' AND (I.id NOT IN (SELECT itemid AS id FROM itemoutofstock) OR (I.id IN (SELECT itemid AS id FROM itemoutofstock WHERE status = 'WARNING')));
       `);
     }
     res.status(200).json(getMenuItems.rows);

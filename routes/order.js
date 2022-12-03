@@ -482,11 +482,15 @@ router.get('/menu/:id', async (req, res) => {
     if (id && id != 0) {
       getMenuItems = await pool.query(
         `
-      SELECT M.id AS menuitemid,I.id, I.name,I.majorGroupId, I.image, M.price, I.id NOT IN (SELECT itemid AS id FROM itemoutofstock) AS inStock
+      SELECT M.id AS menuitemid,I.id, I.name,I.majorGroupId, I.image, M.price, CASE
+	    WHEN I.id NOT IN (SELECT itemid AS id FROM itemoutofstock) THEN 'INSTOCK'
+	    WHEN (SELECT status AS id FROM itemoutofstock WHERE itemid = I.id) = 'EMPTY' THEN 'EMPTY'
+	    WHEN (SELECT status AS id FROM itemoutofstock WHERE itemid = I.id) = 'WARNING' THEN 'WARNING'
+	    END status
       FROM menuitem AS M
       JOIN item AS I
       ON M.itemid = I.id
-      WHERE I.status = 'ACTIVE' AND M.menuid = $1
+      WHERE I.status = 'ACTIVE' AND M.menuid = 1;
       `,
         [id]
       );
