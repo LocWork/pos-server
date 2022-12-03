@@ -20,6 +20,7 @@
 -- CREATE TYPE	checkdetail_status AS ENUM ('WAITING', 'READY', 'SERVED','RECALL', 'VOID');
 -- Create TYPE bill_status AS ENUM ('CLOSED','REFUND');
 -- Create TYPE cashierlog_type AS ENUM ('OPEN','CLOSED');
+-- Create TYPE outofstock_status AS ENUM ('EMPTY','WARNING');
 
 -- CREATE TABLE role (
 -- 	id serial primary key,
@@ -188,7 +189,8 @@
 
 -- CREATE TABLE itemoutofstock (
 --   id serial primary key,
---   itemId integer UNIQUE NOT NULL references item(id)
+--   itemId integer UNIQUE NOT NULL references item(id),
+--   status outofstock_status NOT NULL default 'EMPTY'
 -- );
 
 -- CREATE TABLE mealtype (
@@ -235,7 +237,8 @@
 --   	updaterId integer DEFAULT NULL,
 --   	updateTime timestamp without time zone DEFAULT NULL,
 -- 	"type" cashierlog_type NOT NULL default 'OPEN',
--- 	amount NUMERIC NOT NULL
+-- 	amount NUMERIC NOT NULL,
+-- 	isVerify boolean NOT NULL
 -- );
 
 -- --Basic
@@ -248,19 +251,19 @@
 -- --Account
 -- --password = 123qwe
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
--- 	'admin','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Van A','adminwork@gmail.com','0908888721','OFFLINE',(SELECT id FROM role WHERE name = 'ADMIN'),
+-- 	'admin','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyên Văn A','adminwork@gmail.com','0908888721','OFFLINE',(SELECT id FROM role WHERE name = 'ADMIN'),
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face1.jpg?alt=media&token=5bb9b934-0dcd-472c-9c01-7abcad725b0b');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
--- 	'waiter','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Cao Na','waiterwork@gmail.com','0908888722','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'),
+-- 	'waiter','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Vĩ Cao Na','waiterwork@gmail.com','0908888722','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'),
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face2.jpg?alt=media&token=7807aa71-06ba-4353-b508-29c451b96359');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
--- 	'waiter1','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Cao Ba','waiterwork1@gmail.com','0908888723','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'),
+-- 	'waiter1','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Thành Đại Mỹ','waiterwork1@gmail.com','0908888723','OFFLINE',(SELECT id FROM role WHERE name = 'WAITER'),
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face3.jpg?alt=media&token=65a99768-776b-4251-aaea-bb84a3dcd9ed');	
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
--- 	'cashier','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Tai Ca','cashierwork@gmail.com','0908888724','OFFLINE',(SELECT id FROM role WHERE name = 'CASHIER'),
+-- 	'cashier','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Trung Linh Công','cashierwork@gmail.com','0908888724','OFFLINE',(SELECT id FROM role WHERE name = 'CASHIER'),
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face4.jpg?alt=media&token=a06ae462-6088-4523-aa99-fe0b9e41884d');
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
--- 	'kitchen','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Nguyen Thanh Le','kitchenwork@gmail.com','0908888725','OFFLINE',(SELECT id FROM role WHERE name = 'KITCHEN_STAFF'),
+-- 	'kitchen','$2a$10$ZoIAJaHPngX8rnZ6RSl.neoFg8WsP/yWOE.OhuQ6/ECArQkNFbiJy','Vinh Thế Minh','kitchenwork@gmail.com','0908888725','OFFLINE',(SELECT id FROM role WHERE name = 'KITCHEN_STAFF'),
 -- 'https://firebasestorage.googleapis.com/v0/b/pos-restaurant-30dcc.appspot.com/o/face5.jpg?alt=media&token=0a37a284-bc77-4b2a-8761-8e1a355d6508');
 
 -- INSERT INTO account(username,password,fullname,email,phone,status,roleid,avatar) VALUES(
@@ -892,7 +895,7 @@
 -- INSERT INTO menuitem(itemid,menuid,price) VALUES((SELECT id FROM "item" WHERE status = 'ACTIVE' AND name = 'Salad' LIMIT 1), 
 -- 												 (SELECT id FROM "menu" WHERE status = 'ACTIVE' AND name = 'Món kèm' LIMIT 1), 10000);
 												 
--- INSERT INTO menuitem(itemid,menuid,price) VALUES((SELECT id FROM "item" WHERE status = 'ACTIVE' AND name = 'Mỳ tôm' LIMIT 1), 
+-- INSERT INTO menuitem(itemid,menuid,price) VALUES((SELECT id FROM "item" WHERE status = 'ACTIVE' AND name = 'Mì tôm' LIMIT 1), 
 -- 												 (SELECT id FROM "menu" WHERE status = 'ACTIVE' AND name = 'Món kèm' LIMIT 1), 3000);		
 												 
 -- INSERT INTO menuitem(itemid,menuid,price) VALUES((SELECT id FROM "item" WHERE status = 'ACTIVE' AND name = 'Toboki hải sản' LIMIT 1), 

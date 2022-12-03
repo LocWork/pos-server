@@ -29,25 +29,25 @@ const KnexSessionStore = require('connect-session-knex')(session);
 
 const Knex = require('knex');
 
-const knex = Knex({
-  client: 'pg',
-  connection: {
-    host: '127.0.0.1',
-    user: 'postgres',
-    password: 'qwe',
-    database: 'restaurant',
-  },
-});
-
 // const knex = Knex({
 //   client: 'pg',
 //   connection: {
-//     host: 'containers-us-west-110.railway.app',
+//     host: '127.0.0.1',
 //     user: 'postgres',
-//     password: 'z4ahAWmfBoSd7f4VPVMP',
-//     database: 'railway',
+//     password: 'qwe',
+//     database: 'restaurant',
 //   },
 // });
+
+const knex = Knex({
+  client: 'pg',
+  connection: {
+    host: 'containers-us-west-135.railway.app',
+    user: 'postgres',
+    password: 'lL3mOZbTrZbW2CXrqblw',
+    database: 'railway',
+  },
+});
 
 const store = new KnexSessionStore({
   knex,
