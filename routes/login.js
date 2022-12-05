@@ -5,6 +5,33 @@ const helpers = require('./../utils/helpers');
 const sob = require('./.././staticObj');
 
 //GET restaurant image
+router.get('/demo', async (req, res) => {
+  try {
+    const { start, end } = req.body;
+    const data = await pool.query(
+      `SELECT I.id, I.name, SUM(D.quantity) AS quantity, (AVG(D.completiontime - D.starttime)/SUM(D.quantity))::time AS averageTime
+	    FROM "checkdetail" AS D
+	    JOIN item AS I
+	    ON I.id = D.itemid
+	    JOIN "check" AS C
+	    ON D.checkid = C.id 
+	    WHERE (C.creationtime BETWEEN $1 AND $2) AND D.completiontime IS NOT NULL AND D.status ='SERVED'
+	    GROUP BY
+	  I.id, I.name, D.quantity
+	ORDER 
+	BY D.quantity
+	DESC
+	LIMIT 10
+	;`,
+      [start, end]
+    );
+    res.status(200).json(data.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ msg: 'Lỗi hệ thống' });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const logo = await pool.query(
