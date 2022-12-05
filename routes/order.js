@@ -407,7 +407,7 @@ router.post('/check/add', isCheckActive, isAllItemInStock, async (req, res) => {
       var detail = itemlist[i];
       var checkDetailId = await pool.query(
         `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,note,isreminded,status,starttime) 
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING',CURRENT_TIMESTAMP::time) RETURNING id`,
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'WAITING',CURRENT_TIMESTAMP) RETURNING id`,
         [
           checkid,
           detail.itemid,
