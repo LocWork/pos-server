@@ -14,18 +14,18 @@ router.get('/demo', async (req, res) => {
 	    JOIN item AS I
 	    ON I.id = D.itemid
 	    JOIN "check" AS C
-	    ON D.checkid = C.id 
+	    ON D.checkid = C.id
 	    WHERE (C.creationtime BETWEEN $1 AND $2) AND D.completiontime IS NOT NULL AND D.status ='SERVED'
 	    GROUP BY
 	  I.id, I.name, D.quantity
-	ORDER 
+	ORDER
 	BY D.quantity
 	DESC
 	LIMIT 10
 	;`,
       [start, end]
     );
-    res.status(200).json(data.rows[0]);
+    res.status(200).json(data.rows);
   } catch (error) {
     console.log(error);
     res.status(400).json({ msg: 'Lỗi hệ thống' });
