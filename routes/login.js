@@ -118,28 +118,38 @@ async function validateUserWaiterCashier(req, res, next) {
 async function validateKitchen(req, res, next) {
   try {
     if (req.session.user.role == sob.KITCHEN) {
-      const otherKitchen = await pool.query(
-        `SELECT A.id
-        FROM "account" AS A
-        JOIN "role" AS R
-        ON A.roleid = R.id
-        WHERE A.status = 'ONLINE' AND R.name = 'KITCHEN_STAFF' AND A.id != $1 LIMIT 1`,
-        [req.session.user.id]
+      // const otherKitchen = await pool.query(
+      //   `SELECT A.id
+      //   FROM "account" AS A
+      //   JOIN "role" AS R
+      //   ON A.roleid = R.id
+      //   WHERE A.status = 'ONLINE' AND R.name = 'KITCHEN_STAFF' AND A.id != $1 LIMIT 1`,
+      //   [req.session.user.id]
+      // );
+      // if (otherKitchen.rows[0]) {
+      //   req.session.destroy();
+      //   res.status(400).json({ msg: 'Đã có nhân viên bếp đang làm việc' });
+      // } else {
+      //   const currentShift = await pool.query(
+      //     "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND W.workdate = CURRENT_DATE AND W.isOpen = true LIMIT 1"
+      //   );
+      //   if (currentShift.rows[0]) {
+      //     req.session.shiftId = currentShift.rows[0].id;
+      //     next();
+      //   } else {
+      //     req.session.destroy();
+      //     res.status(400).json({ msg: 'Ca làm việc chưa mở' });
+      //   }
+      // }
+      const currentShift = await pool.query(
+        "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND W.workdate = CURRENT_DATE AND W.isOpen = true LIMIT 1"
       );
-      if (otherKitchen.rows[0]) {
-        req.session.destroy();
-        res.status(400).json({ msg: 'Đã có nhân viên bếp đang làm việc' });
+      if (currentShift.rows[0]) {
+        req.session.shiftId = currentShift.rows[0].id;
+        next();
       } else {
-        const currentShift = await pool.query(
-          "SELECT S.id FROM shift AS S JOIN worksession AS W ON S.worksessionid = W.id WHERE S.isOpen = true AND S.status = 'ACTIVE' AND W.workdate = CURRENT_DATE AND W.isOpen = true LIMIT 1"
-        );
-        if (currentShift.rows[0]) {
-          req.session.shiftId = currentShift.rows[0].id;
-          next();
-        } else {
-          req.session.destroy();
-          res.status(400).json({ msg: 'Ca làm việc chưa mở' });
-        }
+        req.session.destroy();
+        res.status(400).json({ msg: 'Ca làm việc chưa mở' });
       }
     } else {
       next();
