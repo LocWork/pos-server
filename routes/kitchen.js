@@ -323,7 +323,7 @@ router.put('/notify/ready/', async (req, res) => {
     // var locationlist = [];
     for (var i = 0; i < detaillist.length; i++) {
       var updateDetail = await pool.query(
-        `UPDATE checkdetail AS D SET status = 'READY', completiontime = (NOW() - D.starttime) WHERE D.id = $1`,
+        `UPDATE checkdetail AS D SET status = 'READY', completiontime = CURRENT_TIMESTAMP WHERE D.id = $1`,
         [detaillist[i].detailid]
       );
       // const location = await pool.query(
