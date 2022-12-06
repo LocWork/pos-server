@@ -249,7 +249,7 @@ async function transferDetailSingle(
     temp1.taxAmount = Math.ceil(temp.subtotal * (taxAmount / 100));
     temp1.amount = Math.ceil(temp.subtotal + temp.taxAmount);
     const transfer = await pool.query(
-      `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,status,starttime,isreminded) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,false) RETURNING id`,
+      `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,status,starttime,isreminded,note) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,false,$10) RETURNING id`,
       [
         secondTableCheckId,
         temp1.itemid,
@@ -260,6 +260,7 @@ async function transferDetailSingle(
         temp1.amount,
         temp1.status,
         temp1.starttime,
+        temp1.note,
       ]
     );
 
@@ -461,7 +462,7 @@ async function transferPercent(
     temp.amount = Math.ceil(temp.subtotal + temp.taxAmount);
 
     const transfer = await pool.query(
-      `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,status,starttime,isreminded) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,false) RETURNING id`,
+      `INSERT INTO checkdetail(checkid,itemid,itemprice,quantity,subtotal,taxamount,amount,status,starttime,isreminded,note) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,false,$10) RETURNING id`,
       [
         secondTableCheckId,
         temp.itemid,
@@ -472,6 +473,7 @@ async function transferPercent(
         temp.amount,
         temp.status,
         temp.starttime,
+        temp.note,
       ]
     );
 
