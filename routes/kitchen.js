@@ -26,15 +26,6 @@ async function massViewUpdate(id, req, res) {
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
 
-    // if (id && id != 0) {
-    //   req.io
-    //     .to(`POS-L-${id}`)
-    //     .emit(
-    //       'update-pos-tableOverview',
-    //       await helpers.updateTableOverview(id)
-    //     );
-    // }
-
     req.io
       .to(`KDS-L-0`)
       .emit('update-kds-kitchen', await helpers.updateKitchen());
@@ -49,16 +40,6 @@ async function massViewUpdateList(list, req, res) {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-    // for (var i = 0; i < list.length; i++) {
-    //   if (list[i].id && list[i].id != 0) {
-    //     req.io
-    //       .to(`POS-L-${list[i].id}`)
-    //       .emit(
-    //         'update-pos-tableOverview',
-    //         await helpers.updateTableOverview(list[i].id)
-    //       );
-    //   }
-    // }
 
     req.io
       .to(`KDS-L-0`)
@@ -322,25 +303,10 @@ router.put('/notify/ready/', async (req, res) => {
     const { detaillist } = req.body;
     // var locationlist = [];
     for (var i = 0; i < detaillist.length; i++) {
-      var updateDetail = await pool.query(
+      var updatedetail = await pool.query(
         `UPDATE checkdetail AS D SET status = 'READY', completiontime = CURRENT_TIMESTAMP WHERE D.id = $1`,
         [detaillist[i].detailid]
       );
-      // const location = await pool.query(
-      //   `SELECT T.locationid AS id
-      //       FROM checkdetail AS D
-      //       JOIN "check" AS C
-      //       ON D.checkid = C.id
-      //       JOIN "table" AS T
-      //       ON C.tableid = T.id
-      //       WHERE D.id = $1
-      //       LIMIT 1
-      //       ;`,
-      //   [detaillist[i].detailid]
-      // );
-      // if (!locationlist.includes(location.rows[0].id)) {
-      //   locationlist.push(location.rows[0].id);
-      // }
     }
     await massViewUpdate(0, req, res);
     res.status(200).json();
@@ -354,24 +320,20 @@ router.put('/notify/ready/', async (req, res) => {
 router.put('/notify/recall/', async (req, res) => {
   try {
     const { detaillist } = req.body;
-    // var locationlist = [];
     for (var i = 0; i < detaillist.length; i++) {
       var updatedetail = await pool.query(
         `UPDATE checkdetail SET status = 'RECALL' WHERE id = $1`,
         [detaillist[i].detailid]
       );
-
       var item = await pool.query(
         `SELECT itemid from checkdetail WHERE id = $1`,
         [detaillist[i].detailid]
       );
-
       if (item.rows[0]) {
         var updatecheck = await pool.query(
           `UPDATE checkdetail SET status = 'RECALL' WHERE itemid = $1 AND status = 'WAITING'`,
           [item.rows[0].itemid]
         );
-
         var checkitem = await pool.query(
           `SELECT itemid, status FROM itemoutofstock WHERE itemid = $1`,
           [item.rows[0].itemid]
@@ -390,22 +352,6 @@ router.put('/notify/recall/', async (req, res) => {
           }
         }
       }
-
-      // const location = await pool.query(
-      //   `SELECT T.locationid AS id
-      //       FROM checkdetail AS D
-      //       JOIN "check" AS C
-      //       ON D.checkid = C.id
-      //       JOIN "table" AS T
-      //       ON C.tableid = T.id
-      //       WHERE D.id = $1
-      //       LIMIT 1
-      //       ;`,
-      //   [detaillist[i].detailid]
-      // );
-      // if (!locationlist.includes(location.rows[0].id)) {
-      //   locationlist.push(location.rows[0].id);
-      // }
     }
     await massViewUpdate(0, req, res);
     res.status(200).json();

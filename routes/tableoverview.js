@@ -62,14 +62,6 @@ async function massViewUpdate(currentLocationId, req, res) {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-
-    // req.io
-    //   .to(`POS-L-${currentLocationId}`)
-    //   .emit(
-    //     'update-pos-tableOverview',
-    //     await helpers.updateTableOverview(currentLocationId)
-    //   );
-
     req.io
       .to(`KDS-L-0`)
       .emit('update-kds-kitchen', await helpers.updateKitchen());

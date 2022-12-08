@@ -45,14 +45,6 @@ async function massViewUpdate(currentLocationId, req, res) {
     req.io
       .to('POS-L-0')
       .emit('update-pos-tableOverview', await helpers.updateTableOverview(0));
-
-    req.io
-      .to(`POS-L-${currentLocationId}`)
-      .emit(
-        'update-pos-tableOverview',
-        await helpers.updateTableOverview(currentLocationId)
-      );
-
     req.io
       .to(`KDS-L-0`)
       .emit('update-kds-kitchen', await helpers.updateKitchen());
@@ -408,12 +400,6 @@ router.put(
         req
       );
       await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
-      if (
-        firstTableCheck.rows[0].locationid !=
-        secondTableCheck.rows[0].locationid
-      ) {
-        await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
-      }
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);
@@ -547,12 +533,6 @@ router.put(
         req
       );
       await massViewUpdate(firstTableCheck.rows[0].locationid, req, res);
-      if (
-        firstTableCheck.rows[0].locationid !=
-        secondTableCheck.rows[0].locationid
-      ) {
-        await overviewUpdate(secondTableCheck.rows[0].locationid, req, res);
-      }
       res.status(200).json({ msg: 'Món đã được tách' });
     } catch (error) {
       console.log(error);

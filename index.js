@@ -18,9 +18,6 @@ const kitchenRoute = require('./routes/kitchen');
 const transferDetailRoute = require('./routes/transferdetail');
 const cashierlogRoute = require('./routes/cashierlog');
 //other
-
-//Basic express middelware
-// app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -29,6 +26,7 @@ const KnexSessionStore = require('connect-session-knex')(session);
 
 const Knex = require('knex');
 
+//Local run
 // const knex = Knex({
 //   client: 'pg',
 //   connection: {
@@ -77,13 +75,11 @@ io.on('connection', (socket) => {
   socket.on('join-pos-location', (room) => {
     var location = `POS-L-${room}`;
     socket.join(location);
-    console.log(`You have join pos location: ${location}`);
   });
 
   socket.on('join-kds-location', (room) => {
     var kds = `KDS-L-${room}`;
     socket.join(kds);
-    console.log(`You have join kds location: ${kds}`);
   });
 });
 
@@ -118,7 +114,3 @@ app.use('/cashierlog', cashierlogRoute);
 server.listen(PORT, () => {
   console.log('Server running...');
 });
-
-// app.listen(`0.0.0.0:${PORT}`, () => {
-//   console.log(`Connected at port ${PORT}`);
-// });
