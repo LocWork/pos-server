@@ -179,13 +179,14 @@ router.post(
             for (var i = 0; i < paymentlist.length; i++) {
               var payment = await pool.query(
                 `
-          INSERT INTO billpayment(billid,paymentmethodid,paymentmethodname,amountreceive) VALUES($1,$2,$3,$4)
+          INSERT INTO billpayment(billid,paymentmethodid,paymentmethodname,amountreceive,transactionid) VALUES($1,$2,$3,$4,$5)
         `,
                 [
                   createBill.rows[0].id,
                   paymentlist[i].id,
                   paymentlist[i].name,
                   paymentlist[i].amount,
+                  paymentlist[i].transactionid,
                 ]
               );
             }
