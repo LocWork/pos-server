@@ -8,6 +8,7 @@ const pool = new Pool({
   database: 'railway',
 });
 
+//Local run
 // const pool = new Pool({
 //   user: 'postgres',
 //   password: 'qwe',
