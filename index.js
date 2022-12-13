@@ -40,9 +40,9 @@ const Knex = require('knex');
 const knex = Knex({
   client: 'pg',
   connection: {
-    host: 'containers-us-west-144.railway.app',
+    host: 'containers-us-west-166.railway.app',
     user: 'postgres',
-    password: '5HnmMA7eCEZfy7x1zW5M',
+    password: 'YIpPoRDzfHKfcuKAH3Ri',
     database: 'railway',
   },
 });
