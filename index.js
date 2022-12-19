@@ -81,6 +81,10 @@ io.on('connection', (socket) => {
     var kds = `KDS-L-${room}`;
     socket.join(kds);
   });
+
+  socket.on('disconnect', function () {
+    console.log('A user disconnected');
+  });
 });
 
 const compression = require('compression');

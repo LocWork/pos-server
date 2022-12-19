@@ -146,7 +146,7 @@ router.get('/voidreason/', async (req, res) => {
 router.get('/taxvalue/', async (req, res) => {
   try {
     const taxValue = await pool.query(
-      `SELECT COALESCE(taxValue,0) AS taxvalue  FROM systemsetting LIMIT 1`
+      `SELECT COALESCE(taxValue,0) AS taxvalue FROM systemsetting LIMIT 1`
     );
     if (taxValue.rows[0]) {
       res.status(200).json(taxValue.rows[0]);
