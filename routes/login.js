@@ -239,7 +239,7 @@ router.get(`/shift`, async (req, res) => {
     JOIN worksession AS W 
     ON S.worksessionid = W.id 
     WHERE W.isopen = true AND W.workdate = CURRENT_DATE AND 
-	  ((NOW()::time < S.endtime)) 
+	  ((S.endtime > (CURRENT_TIME + interval '7 hour')) OR ((S.starttime >= (CURRENT_TIME + interval '7 hour') AND (CURRENT_TIME + interval '7 hour') < S.endtime ))) 
 	  AND (S.starttime >= COALESCE(
 		(SELECT MAX(S1.endtime) as time FROM "shift" AS S1 
 		JOIN worksession AS W1 
