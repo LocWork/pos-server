@@ -2,9 +2,9 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
   user: 'postgres',
-  password: 'YIpPoRDzfHKfcuKAH3Ri',
-  host: 'containers-us-west-166.railway.app',
-  port: 8010,
+  password: 'kzPwifxzP9F0YUtYA0gl',
+  host: 'containers-us-west-98.railway.app',
+  port: 6692,
   database: 'railway',
 });
 

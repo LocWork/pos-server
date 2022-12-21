@@ -46,11 +46,11 @@ router.put(`/cashierclose`, async (req, res) => {
         req.session.shiftId = updateShift.rows[0].id;
         res.status(200).json();
       } else {
-        req.session.destroy();
+        // req.session.destroy();
         res.status(400).json({ msg: 'Không thể lưu thông tin' });
       }
     } else {
-      req.session.destroy();
+      // req.session.destroy();
       res.status(400).json({ msg: 'Không thể đóng ca' });
     }
   } catch (error) {
