@@ -247,9 +247,9 @@ router.get(`/shift`, async (req, res) => {
 		WHERE S1.openerid IS NOT NULL
 		AND W1.workdate = CURRENT_DATE
 		AND W1.isopen = true
+    AND S1.status = 'ACTIVE'
 		GROUP BY S1.endtime
 		ORDER BY S1.endtime DESC LIMIT 1),'00:00:00')
-    AND S.openerid IS NULL AND S.status = 'ACTIVE' AND S.isopen = false
 		)
     AND S.openerid IS NULL AND S.status = 'ACTIVE' AND S.isopen = false
     ORDER BY
